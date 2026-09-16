@@ -1,1 +1,1 @@
-# ice-dreams-manager
+# skate-legacy
