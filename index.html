@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICE DREAMS — Career Manager</title>
+<title>ICE DREAMS — Career Manager 3D</title>
 <style>
   :root {
     --bg: #0a0e17;
@@ -25,6 +25,7 @@
     color: var(--text);
     min-height: 100vh;
     line-height: 1.5;
+    overflow-x: hidden;
   }
   .app { display: flex; min-height: 100vh; }
   .sidebar {
@@ -109,15 +110,15 @@
   .screen { display: none; }
   .screen.active { display: block; }
   .modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,.75);
+    position: fixed; inset: 0; background: rgba(0,0,0,.8);
     display: flex; align-items: center; justify-content: center;
-    z-index: 100; padding: 20px;
+    z-index: 300; padding: 20px;
   }
   .modal-content {
     background: var(--panel);
     border-radius: 16px;
     padding: 28px;
-    max-width: 520px;
+    max-width: 560px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
@@ -151,11 +152,59 @@
     background: var(--panel2); border: 1px solid var(--accent);
     padding: 14px 20px; border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,.4);
-    z-index: 200; max-width: 320px;
+    z-index: 400; max-width: 320px;
     animation: slideIn .3s ease;
   }
   @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } }
   .hidden { display: none !important; }
+
+  /* ===== 3D COMPETITION ===== */
+  #competition-3d {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 500;
+    display: none;
+  }
+  #competition-3d.active { display: block; }
+  #c3d-canvas { width: 100%; height: 100%; display: block; }
+  #c3d-ui {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 16px 24px;
+    background: linear-gradient(to bottom, rgba(0,0,0,.7), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+  }
+  #c3d-element {
+    background: rgba(0,0,0,.65);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+  #c3d-score {
+    background: rgba(0,0,0,.65);
+    padding: 10px 18px;
+    border-radius: 10px;
+    text-align: right;
+  }
+  #c3d-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,.75), transparent);
+    text-align: center;
+    pointer-events: none;
+  }
+  #c3d-skip {
+    pointer-events: auto;
+    margin-top: 12px;
+  }
+
   @media (max-width: 768px) {
     .app { flex-direction: column; }
     .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; }
@@ -166,33 +215,27 @@
 </head>
 <body>
 <div id="app">
-  <!-- Écran d'accueil -->
+  <!-- Accueil -->
   <div id="screen-home" class="screen active" style="max-width:600px;margin:80px auto;text-align:center;padding:20px;">
     <h1 style="font-size:2.8rem;margin-bottom:8px;">ICE <span style="color:var(--gold)">DREAMS</span></h1>
-    <p style="color:var(--muted);margin-bottom:40px;">Career Manager — Patinage Artistique</p>
+    <p style="color:var(--muted);margin-bottom:12px;">Career Manager 3D — Patinage Artistique</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:40px;">Version 2.0 • Management + Simulation 3D</p>
     <div class="flex" style="justify-content:center;">
       <button class="btn" onclick="startNewCareer()">Nouvelle carrière</button>
       <button class="btn btn-outline" onclick="loadGame()">Continuer</button>
     </div>
   </div>
 
-  <!-- Création de carrière -->
+  <!-- Création -->
   <div id="screen-create" class="screen" style="max-width:640px;margin:40px auto;padding:20px;">
     <h2 style="margin-bottom:24px;">Créer une patineuse</h2>
-    <div class="form-group">
-      <label>Prénom</label>
-      <input id="create-prenom" value="Léa">
-    </div>
-    <div class="form-group">
-      <label>Nom</label>
-      <input id="create-nom" value="Moreau">
-    </div>
+    <div class="form-group"><label>Prénom</label><input id="create-prenom" value="Léa"></div>
+    <div class="form-group"><label>Nom</label><input id="create-nom" value="Moreau"></div>
     <div class="form-group">
       <label>Pays</label>
       <select id="create-pays">
         <option>France</option><option>Canada</option><option>Japon</option>
-        <option>États-Unis</option><option>Russie</option><option>Italie</option>
-        <option>Corée du Sud</option><option>Belgique</option>
+        <option>États-Unis</option><option>Italie</option><option>Corée du Sud</option>
       </select>
     </div>
     <div class="form-group">
@@ -207,7 +250,7 @@
     <div class="form-group">
       <label>Niveau de départ</label>
       <select id="create-niveau">
-        <option value="amateur">Amateur (très faible réputation)</option>
+        <option value="amateur">Amateur</option>
         <option value="junior" selected>Junior prometteuse</option>
         <option value="senior">Senior montante</option>
         <option value="star">Star établie</option>
@@ -221,7 +264,6 @@
         <option>Calme</option>
         <option>Travailleuse acharnée</option>
         <option>Médiatique</option>
-        <option>Sensible à la pression</option>
         <option>Très compétitive</option>
       </select>
     </div>
@@ -240,7 +282,7 @@
     </div>
   </div>
 
-  <!-- Interface principale -->
+  <!-- Jeu principal -->
   <div id="screen-game" class="screen">
     <div class="app">
       <div class="sidebar">
@@ -275,7 +317,6 @@
           </div>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="view-dashboard" class="view">
           <div class="grid">
             <div class="card">
@@ -313,7 +354,6 @@
           </div>
         </div>
 
-        <!-- PATINEUSE -->
         <div id="view-skater" class="view hidden">
           <div class="grid">
             <div class="card">
@@ -326,54 +366,36 @@
               <div class="stat-big" id="sk-potentiel">—</div>
             </div>
           </div>
-          <div class="card" style="margin-top:20px;">
-            <h3>Attributs techniques</h3>
-            <div id="sk-tech" class="grid" style="margin-top:12px;"></div>
-          </div>
-          <div class="card" style="margin-top:20px;">
-            <h3>Attributs artistiques</h3>
-            <div id="sk-art" class="grid" style="margin-top:12px;"></div>
-          </div>
-          <div class="card" style="margin-top:20px;">
-            <h3>Mental & Physique</h3>
-            <div id="sk-ment" class="grid" style="margin-top:12px;"></div>
-          </div>
+          <div class="card" style="margin-top:20px;"><h3>Attributs techniques</h3><div id="sk-tech" class="grid" style="margin-top:12px;"></div></div>
+          <div class="card" style="margin-top:20px;"><h3>Attributs artistiques</h3><div id="sk-art" class="grid" style="margin-top:12px;"></div></div>
+          <div class="card" style="margin-top:20px;"><h3>Mental & Physique</h3><div id="sk-ment" class="grid" style="margin-top:12px;"></div></div>
         </div>
 
-        <!-- STAFF -->
         <div id="view-staff" class="view hidden">
-          <div class="flex" style="margin-bottom:16px;">
-            <button class="btn" onclick="openRecruit()">Recruter</button>
-          </div>
+          <div class="flex" style="margin-bottom:16px;"><button class="btn" onclick="openRecruit()">Recruter</button></div>
           <div id="staff-list"></div>
         </div>
 
-        <!-- ENTRAÎNEMENT -->
         <div id="view-training" class="view hidden">
           <div class="card">
             <h3>Planifier la semaine</h3>
-            <p style="color:var(--muted);margin-bottom:16px;">Choisis le focus principal de la semaine</p>
+            <p style="color:var(--muted);margin-bottom:16px;">Choisis le focus principal</p>
             <div class="flex">
               <button class="btn" onclick="train('technique')">Technique</button>
               <button class="btn" onclick="train('artistique')">Artistique</button>
               <button class="btn" onclick="train('sauts')">Sauts</button>
               <button class="btn" onclick="train('physique')">Physique</button>
               <button class="btn" onclick="train('mental')">Mental</button>
-              <button class="btn btn-outline" onclick="train('repos')">Repos complet</button>
+              <button class="btn btn-outline" onclick="train('repos')">Repos</button>
             </div>
             <div id="train-result" style="margin-top:20px;"></div>
           </div>
         </div>
 
-        <!-- CALENDRIER -->
         <div id="view-calendar" class="view hidden">
-          <div class="card">
-            <h3>Calendrier de la saison</h3>
-            <div id="cal-list"></div>
-          </div>
+          <div class="card"><h3>Calendrier de la saison</h3><div id="cal-list"></div></div>
         </div>
 
-        <!-- PROGRAMMES -->
         <div id="view-programs" class="view hidden">
           <div class="grid">
             <div class="card">
@@ -386,10 +408,7 @@
                   <option value="risky">Ultra-difficile</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label>Musique</label>
-                <input id="sp-music" value="Moonlight Sonata">
-              </div>
+              <div class="form-group"><label>Musique</label><input id="sp-music" value="Moonlight Sonata"></div>
               <button class="btn btn-sm" onclick="saveProgram('short')">Enregistrer</button>
             </div>
             <div class="card">
@@ -402,40 +421,24 @@
                   <option value="risky">Ultra-difficile</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label>Musique</label>
-                <input id="fs-music" value="Carmen">
-              </div>
+              <div class="form-group"><label>Musique</label><input id="fs-music" value="Carmen"></div>
               <button class="btn btn-sm" onclick="saveProgram('free')">Enregistrer</button>
             </div>
           </div>
         </div>
 
-        <!-- COMPÉTITIONS -->
         <div id="view-competitions" class="view hidden">
-          <div class="card">
-            <h3>Compétitions disponibles</h3>
-            <div id="comp-list"></div>
-          </div>
+          <div class="card"><h3>Compétitions disponibles</h3><div id="comp-list"></div></div>
         </div>
 
-        <!-- SCOUTING -->
         <div id="view-scouting" class="view hidden">
-          <div class="card">
-            <h3>Rapports de scouting</h3>
-            <div id="scout-list"></div>
-          </div>
+          <div class="card"><h3>Rapports de scouting</h3><div id="scout-list"></div></div>
         </div>
 
-        <!-- SPONSORS -->
         <div id="view-sponsors" class="view hidden">
-          <div class="card">
-            <h3>Offres de sponsors</h3>
-            <div id="sponsor-list"></div>
-          </div>
+          <div class="card"><h3>Offres de sponsors</h3><div id="sponsor-list"></div></div>
         </div>
 
-        <!-- FINANCES -->
         <div id="view-finances" class="view hidden">
           <div class="grid">
             <div class="card"><h3>Solde actuel</h3><div class="stat-big" id="fin-solde">$—</div></div>
@@ -444,15 +447,10 @@
           </div>
         </div>
 
-        <!-- MÉDIAS -->
         <div id="view-media" class="view hidden">
-          <div class="card">
-            <h3>Demandes médias</h3>
-            <div id="media-list"></div>
-          </div>
+          <div class="card"><h3>Demandes médias</h3><div id="media-list"></div></div>
         </div>
 
-        <!-- CLASSEMENTS -->
         <div id="view-rankings" class="view hidden">
           <div class="card">
             <h3>Classement mondial (Top 20)</h3>
@@ -463,20 +461,33 @@
           </div>
         </div>
 
-        <!-- MESSAGES -->
         <div id="view-messages" class="view hidden">
-          <div class="card">
-            <h3>Boîte de réception</h3>
-            <div id="msg-list"></div>
-          </div>
+          <div class="card"><h3>Boîte de réception</h3><div id="msg-list"></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ===== SCÈNE 3D COMPÉTITION ===== -->
+<div id="competition-3d">
+  <canvas id="c3d-canvas"></canvas>
+  <div id="c3d-ui">
+    <div id="c3d-element">Préparation...</div>
+    <div id="c3d-score">
+      <div>TES: <span id="c3d-tes">0.00</span></div>
+      <div>PCS: <span id="c3d-pcs">0.00</span></div>
+    </div>
+  </div>
+  <div id="c3d-bottom">
+    <div id="c3d-status" style="font-size:1.1rem;margin-bottom:8px;">Programme en cours...</div>
+    <button class="btn btn-outline" id="c3d-skip" onclick="skip3D()">Passer la simulation</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ==================== DONNÉES DE BASE ====================
+// ==================== DONNÉES ====================
 const COMPETITIONS = [
   { id: 'nat', name: 'Championnats Nationaux', level: 1, prestige: 20, prize: 3000, fatigue: 15, week: 8 },
   { id: 'challenger', name: 'Challenger Series', level: 2, prestige: 35, prize: 8000, fatigue: 20, week: 12 },
@@ -502,9 +513,9 @@ const FIRST_NAMES = ['Léa','Emma','Chloe','Sofia','Yuna','Kaori','Alina','Isabe
 const LAST_NAMES = ['Moreau','Kim','Tanaka','Petrova','Rossi','Chen','Garcia','Schmidt','Dubois','Nakamura','Ivanova','Costa','Berg','Silva','Park'];
 const COUNTRIES = ['France','Japon','Corée du Sud','États-Unis','Canada','Italie','Russie','Belgique','Allemagne','Chine'];
 
-// ==================== ÉTAT DU JEU ====================
-let G = null; // Game state
+let G = null;
 
+// ==================== CRÉATION ====================
 function createSkater(prenom, nom, pays, age, niveau, perso) {
   const base = {
     amateur: { tech: 38, art: 40, ment: 42, pot: 78 },
@@ -514,8 +525,7 @@ function createSkater(prenom, nom, pays, age, niveau, perso) {
   }[niveau];
 
   return {
-    prenom, nom, pays, age,
-    personality: perso,
+    prenom, nom, pays, age, personality: perso,
     reputation: niveau === 'amateur' ? 18 : niveau === 'junior' ? 35 : niveau === 'senior' ? 58 : 78,
     form: 75, fatigue: 15, confidence: 70,
     money: niveau === 'amateur' ? 8000 : niveau === 'junior' ? 25000 : niveau === 'senior' ? 70000 : 180000,
@@ -569,10 +579,17 @@ function generateAISkaters(count=60){
   return list.sort((a,b)=>b.points-a.points);
 }
 
-// ==================== INITIALISATION ====================
-function startNewCareer(){
-  showScreen('create');
+function generateSponsors(rep){
+  const list = [];
+  if(rep >= 20) list.push({ name:'Aurora Sports', salary:12000, seasons:2, bonus:8000, req:30 });
+  if(rep >= 40) list.push({ name:'Glide Pro', salary:28000, seasons:2, bonus:15000, req:50 });
+  if(rep >= 55) list.push({ name:'IcePeak', salary:45000, seasons:3, bonus:25000, req:65 });
+  if(rep >= 70) list.push({ name:'Olympic Edge', salary:80000, seasons:3, bonus:40000, req:80 });
+  return list;
 }
+
+// ==================== INIT ====================
+function startNewCareer(){ showScreen('create'); }
 
 function confirmCreate(){
   const prenom = document.getElementById('create-prenom').value.trim() || 'Léa';
@@ -590,7 +607,7 @@ function confirmCreate(){
     week: 1,
     difficulty: diff,
     aiSkaters: generateAISkaters(),
-    news: ['Bienvenue dans ICE DREAMS. Ta carrière commence maintenant.'],
+    news: ['Bienvenue dans ICE DREAMS 3D. Ta carrière commence.'],
     availableSponsors: generateSponsors(skater.reputation)
   };
   updateWorldRank();
@@ -598,19 +615,10 @@ function confirmCreate(){
   showScreen('game');
   navTo(document.querySelector('[data-screen="dashboard"]'));
   renderAll();
-  notify('Carrière créée ! Bonne chance.');
+  notify('Carrière créée !');
 }
 
-function generateSponsors(rep){
-  const list = [];
-  if(rep >= 20) list.push({ name:'Aurora Sports', salary:12000, seasons:2, bonus:8000, req:30 });
-  if(rep >= 40) list.push({ name:'Glide Pro', salary:28000, seasons:2, bonus:15000, req:50 });
-  if(rep >= 55) list.push({ name:'IcePeak', salary:45000, seasons:3, bonus:25000, req:65 });
-  if(rep >= 70) list.push({ name:'Olympic Edge', salary:80000, seasons:3, bonus:40000, req:80 });
-  return list;
-}
-
-// ==================== NAVIGATION ====================
+// ==================== NAV ====================
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
@@ -634,7 +642,6 @@ function renderAll(){
   document.getElementById('header-rank').textContent = '#' + (s.worldRank || '—');
   document.getElementById('header-rep').textContent = 'Rep ' + s.reputation;
 
-  // Dashboard
   document.getElementById('dash-forme').textContent = s.form + '%';
   document.getElementById('bar-forme').style.width = s.form + '%';
   document.getElementById('dash-fatigue').textContent = s.fatigue + '%';
@@ -647,10 +654,8 @@ function renderAll(){
   const next = COMPETITIONS.find(c => c.week >= G.week) || COMPETITIONS[COMPETITIONS.length-1];
   document.getElementById('dash-next-comp').textContent = next.name;
   document.getElementById('dash-next-days').textContent = `Dans ${Math.max(0, next.week - G.week)} semaines`;
-
   document.getElementById('dash-news').innerHTML = G.news.slice(-5).reverse().map(n=>`<p style="margin:6px 0;color:var(--muted)">• ${n}</p>`).join('');
 
-  // Skater
   document.getElementById('sk-identity').innerHTML = `${s.prenom} ${s.nom}<br>${s.age} ans · ${s.pays}`;
   document.getElementById('sk-perso').textContent = 'Personnalité : ' + s.personality;
   document.getElementById('sk-potentiel').textContent = s.potential;
@@ -662,9 +667,8 @@ function renderAll(){
   const mentKeys = ['concentration','pressure','consistency','motivation','discipline','endurance','explosiveness','flexibility','recovery','injuryResist'];
   document.getElementById('sk-ment').innerHTML = mentKeys.map(k=>attrCard(k, s.attributes[k])).join('');
 
-  // Staff
   document.getElementById('staff-list').innerHTML = s.staff.length === 0
-    ? '<p style="color:var(--muted)">Aucun membre d\'équipe. Recrutez pour progresser plus vite.</p>'
+    ? '<p style="color:var(--muted)">Aucun membre d\'équipe.</p>'
     : s.staff.map((st,i)=>`
       <div class="card" style="margin-bottom:12px;">
         <strong>${st.role}</strong> — ${st.name}<br>
@@ -672,7 +676,6 @@ function renderAll(){
         <button class="btn btn-sm btn-danger" style="float:right" onclick="fireStaff(${i})">Licencier</button>
       </div>`).join('');
 
-  // Calendar
   document.getElementById('cal-list').innerHTML = COMPETITIONS.map(c=>{
     const entered = s.calendar.includes(c.id);
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
@@ -681,42 +684,37 @@ function renderAll(){
     </div>`;
   }).join('');
 
-  // Competitions (same as calendar for now)
   document.getElementById('comp-list').innerHTML = COMPETITIONS.map(c=>{
     const entered = s.calendar.includes(c.id);
     const canRun = G.week >= c.week && entered;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
       <div><strong>${c.name}</strong><br><span style="color:var(--muted)">Semaine ${c.week}</span></div>
-      ${canRun ? `<button class="btn btn-sm" onclick="runCompetition('${c.id}')">Simuler</button>` : 
+      ${canRun ? `<button class="btn btn-sm" onclick="startCompetition3D('${c.id}')">Simuler en 3D</button>` : 
         entered ? `<span class="badge badge-blue">Inscrite</span>` : `<span style="color:var(--muted)">Non inscrite</span>`}
     </div>`;
   }).join('');
 
-  // Scouting
   document.getElementById('scout-list').innerHTML = G.aiSkaters.slice(0,12).map(ai=>`
     <div style="padding:10px 0;border-bottom:1px solid var(--border)">
       <strong>${ai.name}</strong> (${ai.country}) — ${ai.age} ans<br>
-      <span style="color:var(--muted)">Tech ~${ai.tech} · Art ~${ai.art} · Potentiel estimé ${ai.potential-4}–${ai.potential+3}</span>
+      <span style="color:var(--muted)">Tech ~${ai.tech} · Art ~${ai.art} · Potentiel ~${ai.potential}</span>
     </div>`).join('');
 
-  // Sponsors
   document.getElementById('sponsor-list').innerHTML = G.availableSponsors.map((sp,i)=>`
     <div class="card" style="margin-bottom:12px;">
       <strong>${sp.name}</strong><br>
-      $${sp.salary.toLocaleString()}/saison · ${sp.seasons} saisons · Bonus podium $${sp.bonus.toLocaleString()}<br>
-      <span style="color:var(--muted)">Exigence : Réputation ≥ ${sp.req}</span>
+      $${sp.salary.toLocaleString()}/saison · ${sp.seasons} saisons · Bonus $${sp.bonus.toLocaleString()}<br>
+      <span style="color:var(--muted)">Réputation ≥ ${sp.req}</span>
       <div class="flex" style="margin-top:10px;">
         <button class="btn btn-sm" onclick="acceptSponsor(${i})">Accepter</button>
         <button class="btn btn-sm btn-outline" onclick="G.availableSponsors.splice(${i},1);renderAll()">Refuser</button>
       </div>
-    </div>`).join('') || '<p style="color:var(--muted)">Aucune offre pour le moment.</p>';
+    </div>`).join('') || '<p style="color:var(--muted)">Aucune offre.</p>';
 
-  // Finances
   document.getElementById('fin-solde').textContent = '$' + s.money.toLocaleString();
   document.getElementById('fin-rev').textContent = '$' + s.seasonIncome.toLocaleString();
   document.getElementById('fin-dep').textContent = '$' + s.seasonExpense.toLocaleString();
 
-  // Rankings
   const ranking = [...G.aiSkaters];
   ranking.push({ name: s.prenom+' '+s.nom, country: s.pays, points: s.worldPoints, isPlayer:true });
   ranking.sort((a,b)=>b.points-a.points);
@@ -725,12 +723,10 @@ function renderAll(){
       <td>${i+1}</td><td>${r.name}</td><td>${r.country}</td><td>${r.points}</td>
     </tr>`).join('');
 
-  // Messages
   document.getElementById('msg-list').innerHTML = s.messages.length === 0
     ? '<p style="color:var(--muted)">Aucun message.</p>'
     : s.messages.slice().reverse().map(m=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${m.from}</strong><br>${m.text}</div>`).join('');
 
-  // Programs
   document.getElementById('sp-strategy').value = s.programs.short.strategy;
   document.getElementById('sp-music').value = s.programs.short.music;
   document.getElementById('fs-strategy').value = s.programs.free.strategy;
@@ -739,10 +735,10 @@ function renderAll(){
 
 function attrCard(key, val){
   const labels = {axel:'Axel',lutz:'Lutz',flip:'Flip',loop:'Loop',salchow:'Salchow',toe:'Toe Loop',
-    rotations:'Rotations',precision:'Précision',edge:'Edge quality',spins:'Spins',steps:'Steps',
+    rotations:'Rotations',precision:'Précision',edge:'Edge',spins:'Spins',steps:'Steps',
     interpretation:'Interprétation',musicality:'Musicalité',performance:'Performance',presence:'Présence',
     composition:'Composition',transitions:'Transitions',skatingSkills:'Skating skills',
-    concentration:'Concentration',pressure:'Gestion pression',consistency:'Régularité',
+    concentration:'Concentration',pressure:'Pression',consistency:'Régularité',
     motivation:'Motivation',discipline:'Discipline',endurance:'Endurance',explosiveness:'Explosivité',
     flexibility:'Flexibilité',recovery:'Récupération',injuryResist:'Résistance blessures'};
   return `<div style="background:var(--panel2);padding:10px;border-radius:8px;">
@@ -754,14 +750,14 @@ function attrCard(key, val){
 // ==================== ACTIONS ====================
 function train(type){
   const s = G.skater;
-  if(s.fatigue > 88){ notify('Trop fatiguée pour s\'entraîner'); return; }
+  if(s.fatigue > 88){ notify('Trop fatiguée'); return; }
   let msg = '';
   const gain = rnd(1,3);
   if(type === 'repos'){
     s.fatigue = Math.max(0, s.fatigue - rnd(18,28));
     s.form = Math.min(100, s.form + rnd(3,7));
     s.confidence = Math.min(100, s.confidence + rnd(1,4));
-    msg = 'Repos complet effectué. Fatigue diminuée.';
+    msg = 'Repos effectué.';
   } else {
     s.fatigue = Math.min(100, s.fatigue + rnd(8,14));
     s.form = Math.min(100, s.form + rnd(1,3));
@@ -770,10 +766,10 @@ function train(type){
     if(type==='sauts'){ ['axel','lutz','flip','rotations','explosiveness'].forEach(k=>s.attributes[k]=Math.min(99,s.attributes[k]+gain+1)); }
     if(type==='physique'){ s.attributes.endurance=Math.min(99,s.attributes.endurance+gain); s.attributes.recovery=Math.min(99,s.attributes.recovery+gain); }
     if(type==='mental'){ s.attributes.concentration=Math.min(99,s.attributes.concentration+gain); s.confidence=Math.min(100,s.confidence+rnd(2,5)); }
-    msg = `Entraînement ${type} terminé (+${gain} environ)`;
+    msg = `Entraînement ${type} terminé.`;
     if(Math.random() < 0.07 + s.fatigue/400){
       s.injuries.push({ type:'légère', days: rnd(3,8) });
-      msg += ' — ⚠ Petite blessure !';
+      msg += ' ⚠ Petite blessure !';
     }
   }
   document.getElementById('train-result').innerHTML = `<p style="color:var(--success)">${msg}</p>`;
@@ -808,7 +804,7 @@ function openRecruit(){
   const available = STAFF_POOL.filter(st => !G.skater.staff.find(x=>x.role===st.role));
   if(available.length===0){ notify('Tous les postes sont pourvus'); return; }
   const st = available[rnd(0,available.length-1)];
-  if(confirm(`Recruter ${st.name} (${st.role}) pour $${st.salary.toLocaleString()}/saison ?\nBonus : ${st.bonus}`)){
+  if(confirm(`Recruter ${st.name} (${st.role}) pour $${st.salary.toLocaleString()}/saison ?`)){
     G.skater.staff.push({...st});
     G.skater.money -= Math.floor(st.salary/4);
     G.skater.seasonExpense += Math.floor(st.salary/4);
@@ -838,140 +834,31 @@ function acceptSponsor(i){
   saveGame();
 }
 
-function runCompetition(id){
-  const comp = COMPETITIONS.find(c=>c.id===id);
-  const s = G.skater;
-  if(s.fatigue > 90){ notify('Trop fatiguée pour concourir'); return; }
-
-  // Simulation
-  const strat = s.programs.free.strategy;
-  let risk = strat==='secure' ? 0.12 : strat==='balanced' ? 0.22 : 0.38;
-  risk += s.fatigue/300 - s.form/400 - s.confidence/500;
-
-  const techBase = (s.attributes.lutz + s.attributes.flip + s.attributes.axel + s.attributes.rotations + s.attributes.precision)/5;
-  const artBase = (s.attributes.interpretation + s.attributes.performance + s.attributes.skatingSkills + s.attributes.musicality)/4;
-  const mental = (s.attributes.concentration + s.attributes.pressure + s.attributes.consistency)/3;
-
-  let techScore = techBase * 0.55 + rnd(-6,8);
-  let pcs = artBase * 0.48 + rnd(-4,6);
-  let falls = 0;
-
-  // Éléments
-  const elements = [
-    {name:'Triple Lutz + Triple Toe', base:11.2},
-    {name:'Triple Flip', base:5.3},
-    {name:'Triple Loop', base:5.1},
-    {name:'Double Axel', base:3.3},
-    {name:'Spin combinaison', base:3.2},
-    {name:'Step Sequence', base:3.5}
-  ];
-
-  let report = `<h3>${comp.name} — Résultat</h3><div style="margin:16px 0;">`;
-  elements.forEach(el=>{
-    const success = Math.random() > risk;
-    if(success){
-      report += `<div>✓ ${el.name} <span style="color:var(--success)">Réussi</span></div>`;
-      techScore += el.base * (0.9 + Math.random()*0.2);
-    } else {
-      falls++;
-      report += `<div>✗ ${el.name} <span style="color:var(--danger)">Chute / erreur</span></div>`;
-      techScore += el.base * 0.3;
-    }
-  });
-  report += `</div>`;
-
-  techScore = Math.max(20, Math.min(95, techScore));
-  pcs = Math.max(18, Math.min(50, pcs));
-  const deductions = falls * 1.0;
-  const total = +(techScore + pcs - deductions).toFixed(2);
-
-  // Classement simplifié
-  let place = 1;
-  if(total < 55) place = rnd(8,15);
-  else if(total < 70) place = rnd(4,9);
-  else if(total < 82) place = rnd(2,5);
-  else if(total < 90) place = rnd(1,3);
-  else place = 1;
-
-  const prize = place===1 ? comp.prize : place<=3 ? Math.floor(comp.prize*0.4) : Math.floor(comp.prize*0.1);
-  const points = place===1 ? 400 : place===2 ? 280 : place===3 ? 200 : Math.max(20, 120-place*8);
-  const prestigeGain = place===1 ? comp.prestige : place<=3 ? Math.floor(comp.prestige*0.5) : Math.floor(comp.prestige*0.15);
-
-  s.money += prize;
-  s.seasonIncome += prize;
-  s.worldPoints += points;
-  s.reputation = Math.min(99, s.reputation + Math.floor(prestigeGain/8));
-  s.fatigue = Math.min(100, s.fatigue + comp.fatigue);
-  s.form = Math.max(30, s.form - rnd(3,8) + (place<=3?5:0));
-  s.confidence = Math.max(20, Math.min(100, s.confidence + (place<=3?8:-4)));
-
-  updateWorldRank();
-
-  report += `
-    <p><strong>Technical Score</strong> ${techScore.toFixed(2)}</p>
-    <p><strong>PCS</strong> ${pcs.toFixed(2)}</p>
-    <p><strong>Déductions</strong> -${deductions.toFixed(2)}</p>
-    <p style="font-size:1.4rem;margin:12px 0;"><strong>TOTAL ${total}</strong></p>
-    <p>Classement : <strong>${place}e</strong></p>
-    <p>+$${prize.toLocaleString()} · +${points} pts · Réputation +${Math.floor(prestigeGain/8)}</p>
-  `;
-
-  G.news.push(`${s.prenom} termine ${place}e au ${comp.name} (${total} pts)`);
-  s.results.push({ comp: comp.name, place, score: total, season: G.season });
-
-  // Modal résultat
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  modal.innerHTML = `<div class="modal-content">${report}<br><button class="btn" onclick="this.closest('.modal').remove()">Fermer</button></div>`;
-  document.body.appendChild(modal);
-
-  renderAll();
-  saveGame();
-}
-
 function updateWorldRank(){
   const ranking = [...G.aiSkaters];
   ranking.push({ name: G.skater.prenom+' '+G.skater.nom, points: G.skater.worldPoints, isPlayer:true });
   ranking.sort((a,b)=>b.points-a.points);
-  const idx = ranking.findIndex(r=>r.isPlayer);
-  G.skater.worldRank = idx + 1;
+  G.skater.worldRank = ranking.findIndex(r=>r.isPlayer) + 1;
 }
 
 function advanceWeek(){
   G.week++;
   const s = G.skater;
-  // Récupération naturelle
   s.fatigue = Math.max(0, s.fatigue - rnd(4,9));
   if(s.injuries.length) s.injuries = s.injuries.filter(inj=>{ inj.days--; return inj.days > 0; });
-
-  // Salaires staff
   s.staff.forEach(st=>{
     const cost = Math.floor(st.salary / 40);
     s.money -= cost;
     s.seasonExpense += cost;
   });
-
-  // Événements aléatoires
   if(Math.random() < 0.18){
-    const events = [
-      'Excellente séance d\'entraînement cette semaine.',
-      'Un journaliste demande une interview.',
-      'Petite baisse de motivation.',
-      'Le coach est très satisfait des progrès.',
-      'Offre d\'exhibition reçue.'
-    ];
+    const events = ['Excellente séance d\'entraînement.','Un journaliste demande une interview.','Petite baisse de motivation.','Le coach est satisfait.','Offre d\'exhibition reçue.'];
     const ev = events[rnd(0,events.length-1)];
     G.news.push(ev);
-    if(ev.includes('interview')) s.messages.push({from:'Journaliste', text:'Souhaitez-vous répondre à quelques questions avant la prochaine compétition ?'});
+    if(ev.includes('interview')) s.messages.push({from:'Journaliste', text:'Souhaitez-vous répondre à quelques questions ?'});
   }
-
-  if(G.week > 52){
-    endSeason();
-  } else {
-    notify(`Semaine ${G.week}`);
-    renderAll();
-    saveGame();
-  }
+  if(G.week > 52) endSeason();
+  else { notify(`Semaine ${G.week}`); renderAll(); saveGame(); }
 }
 
 function endSeason(){
@@ -982,12 +869,412 @@ function endSeason(){
   G.skater.seasonExpense = 0;
   G.skater.calendar = [];
   G.availableSponsors = generateSponsors(G.skater.reputation);
-  // Léger vieillissement
   if(G.skater.age > 26){
     ['axel','lutz','flip','explosiveness'].forEach(k=>G.skater.attributes[k] = Math.max(30, G.skater.attributes[k]-rnd(1,2)));
   }
   G.news.push(`Nouvelle saison ${G.season}/${G.season+1} !`);
-  notify('Nouvelle saison commencée');
+  notify('Nouvelle saison');
+  renderAll();
+  saveGame();
+}
+
+// ==================== 3D COMPETITION ====================
+let scene, camera, renderer, skaterMesh, ice, clock;
+let animState = 'idle';
+let animTime = 0;
+let currentElementIndex = 0;
+let programElements = [];
+let tes = 0, pcs = 0, falls = 0;
+let currentComp = null;
+let animationId = null;
+
+function startCompetition3D(id){
+  currentComp = COMPETITIONS.find(c => c.id === id);
+  if(!currentComp) return;
+
+  const s = G.skater;
+  if(s.fatigue > 92){ notify('Trop fatiguée pour concourir'); return; }
+
+  // Construire le programme d'éléments selon stratégie
+  const strat = s.programs.free.strategy;
+  programElements = buildProgram(strat);
+  currentElementIndex = 0;
+  tes = 0; pcs = 0; falls = 0;
+
+  document.getElementById('competition-3d').classList.add('active');
+  document.getElementById('c3d-element').textContent = 'Entrée sur la glace...';
+  document.getElementById('c3d-tes').textContent = '0.00';
+  document.getElementById('c3d-pcs').textContent = '0.00';
+  document.getElementById('c3d-status').textContent = currentComp.name + ' — Programme libre';
+
+  init3D();
+  animate3D();
+}
+
+function buildProgram(strat){
+  // Programme simplifié d'éléments
+  if(strat === 'secure'){
+    return [
+      { name: '2A', base: 3.3, type: 'jump' },
+      { name: '3T', base: 4.2, type: 'jump' },
+      { name: '3S', base: 4.3, type: 'jump' },
+      { name: 'CCoSp4', base: 3.5, type: 'spin' },
+      { name: 'StSq3', base: 3.3, type: 'steps' },
+      { name: '3Lo', base: 4.9, type: 'jump' },
+      { name: 'FCSp3', base: 2.8, type: 'spin' }
+    ];
+  } else if(strat === 'risky'){
+    return [
+      { name: '3A', base: 8.0, type: 'jump' },
+      { name: '3Lz+3T', base: 11.2, type: 'jump' },
+      { name: '3F+3T', base: 10.3, type: 'jump' },
+      { name: 'CCoSp4', base: 3.5, type: 'spin' },
+      { name: 'StSq4', base: 3.9, type: 'steps' },
+      { name: '3Lo+2T', base: 7.2, type: 'jump' },
+      { name: 'FCSp4', base: 3.2, type: 'spin' }
+    ];
+  } else {
+    return [
+      { name: '3A', base: 8.0, type: 'jump' },
+      { name: '3Lz+2T', base: 8.1, type: 'jump' },
+      { name: '3F', base: 5.3, type: 'jump' },
+      { name: 'CCoSp4', base: 3.5, type: 'spin' },
+      { name: 'StSq3', base: 3.3, type: 'steps' },
+      { name: '3Lo', base: 4.9, type: 'jump' },
+      { name: 'FCSp3', base: 2.8, type: 'spin' }
+    ];
+  }
+}
+
+function init3D(){
+  const canvas = document.getElementById('c3d-canvas');
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e17);
+  scene.fog = new THREE.Fog(0x0a0e17, 30, 80);
+
+  camera = new THREE.PerspectiveCamera(50, width/height, 0.1, 200);
+  camera.position.set(0, 12, 28);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+
+  // Lumières
+  const ambient = new THREE.AmbientLight(0x6688aa, 0.4);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(10, 25, 10);
+  dir.castShadow = true;
+  scene.add(dir);
+  const spot = new THREE.SpotLight(0x88ccff, 0.6);
+  spot.position.set(0, 30, 0);
+  scene.add(spot);
+
+  // Glace
+  const iceGeo = new THREE.CircleGeometry(18, 64);
+  const iceMat = new THREE.MeshStandardMaterial({
+    color: 0xb8d4e8,
+    metalness: 0.3,
+    roughness: 0.15
+  });
+  ice = new THREE.Mesh(iceGeo, iceMat);
+  ice.rotation.x = -Math.PI/2;
+  ice.receiveShadow = true;
+  scene.add(ice);
+
+  // Bord de la patinoire
+  const boardGeo = new THREE.TorusGeometry(18.3, 0.4, 8, 64);
+  const boardMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f });
+  const board = new THREE.Mesh(boardGeo, boardMat);
+  board.rotation.x = Math.PI/2;
+  board.position.y = 0.3;
+  scene.add(board);
+
+  // Tribunes simplifiées
+  for(let i=0; i<8; i++){
+    const angle = (i/8) * Math.PI * 2;
+    const stand = new THREE.Mesh(
+      new THREE.BoxGeometry(8, 4, 3),
+      new THREE.MeshStandardMaterial({ color: 0x1a2332 })
+    );
+    stand.position.set(Math.cos(angle)*24, 2, Math.sin(angle)*24);
+    stand.lookAt(0, 2, 0);
+    scene.add(stand);
+  }
+
+  // Patineuse (modèle stylisé)
+  skaterMesh = createSkaterModel();
+  skaterMesh.position.set(0, 0.9, 8);
+  scene.add(skaterMesh);
+
+  clock = new THREE.Clock();
+  animState = 'enter';
+  animTime = 0;
+}
+
+function createSkaterModel(){
+  const group = new THREE.Group();
+
+  // Corps
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.35, 0.9, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0x3b82f6 })
+  );
+  body.position.y = 0.7;
+  body.castShadow = true;
+  group.add(body);
+
+  // Tête
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.28, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xf5d0c5 })
+  );
+  head.position.y = 1.55;
+  group.add(head);
+
+  // Cheveux
+  const hair = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0x1a1a2e })
+  );
+  hair.position.y = 1.65;
+  hair.scale.set(1, 0.7, 1);
+  group.add(hair);
+
+  // Bras
+  const armMat = new THREE.MeshStandardMaterial({ color: 0xf5d0c5 });
+  const leftArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.55, 4, 8), armMat);
+  leftArm.position.set(-0.5, 0.9, 0);
+  leftArm.rotation.z = 0.3;
+  group.add(leftArm);
+  const rightArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.55, 4, 8), armMat);
+  rightArm.position.set(0.5, 0.9, 0);
+  rightArm.rotation.z = -0.3;
+  group.add(rightArm);
+
+  // Jambes
+  const legMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+  const leftLeg = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.7, 4, 8), legMat);
+  leftLeg.position.set(-0.18, 0.1, 0);
+  group.add(leftLeg);
+  const rightLeg = new THREE.Mesh(new THREE.CapsuleGeometry(0.12, 0.7, 4, 8), legMat);
+  rightLeg.position.set(0.18, 0.1, 0);
+  group.add(rightLeg);
+
+  // Patins
+  const skateMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+  const leftSkate = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.45), skateMat);
+  leftSkate.position.set(-0.18, -0.35, 0.05);
+  group.add(leftSkate);
+  const rightSkate = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.45), skateMat);
+  rightSkate.position.set(0.18, -0.35, 0.05);
+  group.add(rightSkate);
+
+  group.userData = { leftArm, rightArm, body, head };
+  return group;
+}
+
+function animate3D(){
+  animationId = requestAnimationFrame(animate3D);
+  const dt = clock.getDelta();
+  animTime += dt;
+
+  // Animation selon l'état
+  if(animState === 'enter'){
+    skaterMesh.position.z -= dt * 3;
+    skaterMesh.rotation.y = Math.PI;
+    if(skaterMesh.position.z <= 0){
+      skaterMesh.position.z = 0;
+      animState = 'program';
+      animTime = 0;
+      playNextElement();
+    }
+  }
+  else if(animState === 'program'){
+    // Léger mouvement de patinage
+    skaterMesh.position.x = Math.sin(animTime * 1.5) * 4;
+    skaterMesh.position.z = Math.cos(animTime * 0.8) * 3;
+    skaterMesh.rotation.y = Math.atan2(
+      Math.cos(animTime * 1.5) * 4,
+      -Math.sin(animTime * 0.8) * 3
+    ) + Math.PI;
+
+    // Bras
+    if(skaterMesh.userData.leftArm){
+      skaterMesh.userData.leftArm.rotation.z = 0.3 + Math.sin(animTime * 3) * 0.2;
+      skaterMesh.userData.rightArm.rotation.z = -0.3 - Math.sin(animTime * 3) * 0.2;
+    }
+  }
+  else if(animState === 'jump'){
+    const t = animTime;
+    if(t < 0.4){
+      skaterMesh.position.y = 0.9 + t * 6;
+      skaterMesh.rotation.y += dt * 12;
+    } else if(t < 0.9){
+      skaterMesh.position.y = 0.9 + (0.9 - t) * 5;
+      skaterMesh.rotation.y += dt * 10;
+    } else {
+      skaterMesh.position.y = 0.9;
+      animState = 'program';
+      animTime = 0;
+      setTimeout(playNextElement, 600);
+    }
+  }
+  else if(animState === 'spin'){
+    skaterMesh.rotation.y += dt * 14;
+    if(skaterMesh.userData.leftArm){
+      skaterMesh.userData.leftArm.rotation.z = 1.2;
+      skaterMesh.userData.rightArm.rotation.z = -1.2;
+    }
+    if(animTime > 2.2){
+      animState = 'program';
+      animTime = 0;
+      if(skaterMesh.userData.leftArm){
+        skaterMesh.userData.leftArm.rotation.z = 0.3;
+        skaterMesh.userData.rightArm.rotation.z = -0.3;
+      }
+      setTimeout(playNextElement, 500);
+    }
+  }
+  else if(animState === 'end'){
+    skaterMesh.rotation.y += dt * 0.5;
+    if(animTime > 3){
+      finishCompetition3D();
+    }
+  }
+
+  // Caméra qui suit
+  if(skaterMesh){
+    const target = new THREE.Vector3(
+      skaterMesh.position.x * 0.3,
+      8,
+      skaterMesh.position.z + 18
+    );
+    camera.position.lerp(target, 0.03);
+    camera.lookAt(skaterMesh.position.x, 1, skaterMesh.position.z);
+  }
+
+  renderer.render(scene, camera);
+}
+
+function playNextElement(){
+  if(currentElementIndex >= programElements.length){
+    animState = 'end';
+    animTime = 0;
+    document.getElementById('c3d-element').textContent = 'Pose finale';
+    document.getElementById('c3d-status').textContent = 'Fin du programme';
+    return;
+  }
+
+  const el = programElements[currentElementIndex];
+  const s = G.skater;
+
+  // Calcul de réussite
+  let risk = s.programs.free.strategy === 'secure' ? 0.10 :
+             s.programs.free.strategy === 'risky' ? 0.32 : 0.20;
+  risk += s.fatigue / 350 - s.form / 450 - s.confidence / 500;
+  risk = Math.max(0.05, Math.min(0.55, risk));
+
+  const success = Math.random() > risk;
+  let goe = 0;
+  let text = el.name + ' ';
+
+  if(success){
+    goe = (Math.random() * 2.4 - 0.4).toFixed(2);
+    tes += el.base + parseFloat(goe);
+    text += `<span style="color:#34d399">✓ Clean</span>  GOE ${goe > 0 ? '+'+goe : goe}`;
+    if(el.type === 'jump') animState = 'jump';
+    else if(el.type === 'spin') animState = 'spin';
+    else animState = 'program';
+  } else {
+    falls++;
+    tes += el.base * 0.25;
+    text += `<span style="color:#f87171">✕ Fall / Error</span>  -1.00`;
+    animState = 'program';
+  }
+
+  animTime = 0;
+  document.getElementById('c3d-element').innerHTML = text;
+  document.getElementById('c3d-tes').textContent = tes.toFixed(2);
+
+  // PCS progressif
+  pcs = Math.min(45, (s.attributes.interpretation + s.attributes.performance + s.attributes.skatingSkills) / 6 + rnd(0,6));
+  document.getElementById('c3d-pcs').textContent = pcs.toFixed(2);
+
+  currentElementIndex++;
+  if(animState === 'program') setTimeout(playNextElement, 1800);
+}
+
+function skip3D(){
+  // Terminer rapidement
+  while(currentElementIndex < programElements.length){
+    const el = programElements[currentElementIndex];
+    const success = Math.random() > 0.22;
+    if(success) tes += el.base + (Math.random()*1.5);
+    else { tes += el.base * 0.3; falls++; }
+    currentElementIndex++;
+  }
+  pcs = Math.min(45, (G.skater.attributes.interpretation + G.skater.attributes.performance) / 5 + rnd(2,8));
+  finishCompetition3D();
+}
+
+function finishCompetition3D(){
+  cancelAnimationFrame(animationId);
+  document.getElementById('competition-3d').classList.remove('active');
+
+  // Nettoyage Three.js
+  if(renderer){
+    renderer.dispose();
+    renderer = null;
+  }
+
+  const s = G.skater;
+  const deductions = falls * 1.0;
+  const total = +(tes + pcs - deductions).toFixed(2);
+
+  let place = 1;
+  if(total < 55) place = rnd(8,14);
+  else if(total < 70) place = rnd(4,9);
+  else if(total < 82) place = rnd(2,5);
+  else if(total < 92) place = rnd(1,3);
+  else place = 1;
+
+  const prize = place === 1 ? currentComp.prize : place <= 3 ? Math.floor(currentComp.prize * 0.4) : Math.floor(currentComp.prize * 0.12);
+  const points = place === 1 ? 400 : place === 2 ? 280 : place === 3 ? 200 : Math.max(20, 130 - place * 9);
+  const prestigeGain = place === 1 ? currentComp.prestige : place <= 3 ? Math.floor(currentComp.prestige * 0.5) : Math.floor(currentComp.prestige * 0.15);
+
+  s.money += prize;
+  s.seasonIncome += prize;
+  s.worldPoints += points;
+  s.reputation = Math.min(99, s.reputation + Math.floor(prestigeGain / 8));
+  s.fatigue = Math.min(100, s.fatigue + currentComp.fatigue);
+  s.form = Math.max(30, s.form - rnd(3,8) + (place <= 3 ? 6 : 0));
+  s.confidence = Math.max(20, Math.min(100, s.confidence + (place <= 3 ? 9 : -5)));
+  updateWorldRank();
+
+  G.news.push(`${s.prenom} termine ${place}e au ${currentComp.name} (${total})`);
+  s.results.push({ comp: currentComp.name, place, score: total, season: G.season });
+
+  // Modal résultat
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2 style="margin-bottom:16px;">${currentComp.name}</h2>
+      <p style="font-size:1.5rem;margin-bottom:12px;"><strong>TOTAL : ${total}</strong></p>
+      <p>TES : ${tes.toFixed(2)} &nbsp;|&nbsp; PCS : ${pcs.toFixed(2)} &nbsp;|&nbsp; Déductions : -${deductions.toFixed(2)}</p>
+      <p style="margin:16px 0;">Classement : <strong>${place}e place</strong></p>
+      <p>+$${prize.toLocaleString()} · +${points} pts · Réputation +${Math.floor(prestigeGain/8)}</p>
+      <br>
+      <button class="btn" onclick="this.closest('.modal').remove()">Continuer</button>
+    </div>`;
+  document.body.appendChild(modal);
+
   renderAll();
   saveGame();
 }
@@ -1015,10 +1302,14 @@ function notify(msg){
   setTimeout(()=>n.remove(), 3200);
 }
 
-// Démarrage
-if(localStorage.getItem('iceDreamsSave')){
-  // optionnel : auto-load
-}
+// Resize
+window.addEventListener('resize', ()=>{
+  if(camera && renderer){
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+});
 </script>
 </body>
 </html>
