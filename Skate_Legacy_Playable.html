@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SKATE LEGACY — Figure Skating Manager</title>
+<style>
+:root{--bg:#090a12;--card:#131522;--card2:#1a1d2d;--text:#f7f7fb;--muted:#9ca3b5;--accent:#d9b8ff;--good:#7ee2b8;--bad:#ff7f9c;--line:#292d42}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#30214b 0,#090a12 45%);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;min-height:100vh}
+button,select,input{font:inherit}button{border:0;cursor:pointer;color:var(--text)}
+.app{max-width:1100px;margin:auto;padding-bottom:90px}.top{padding:22px 18px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}.logo{font-weight:900;letter-spacing:3px;font-size:18px}.pill{background:var(--card2);border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-size:12px}
+.hero{margin:12px 16px 18px;padding:24px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#171a2b,#10111b);box-shadow:0 15px 50px #0007}.hero h1{font-size:30px;margin:0 0 8px}.hero p{color:var(--muted);margin:0 0 18px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}.card h3{margin:0 0 9px}.muted{color:var(--muted);font-size:13px}.btn{background:var(--accent);color:#17101f;padding:11px 15px;border-radius:12px;font-weight:800}.btn.secondary{background:var(--card2);color:var(--text);border:1px solid var(--line)}.btn.danger{background:#3b1724;color:#ffb0c0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.bar{height:7px;background:#292d42;border-radius:20px;overflow:hidden;margin-top:6px}.fill{height:100%;background:var(--accent);border-radius:20px}.skater{display:flex;justify-content:space-between;gap:10px;align-items:center}.avatar{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#342650,#20283f);display:grid;place-items:center;font-weight:900}.name{font-weight:800}.tag{font-size:11px;border:1px solid var(--line);padding:4px 7px;border-radius:8px;color:#c9cce0}.score{font-size:26px;font-weight:900}.nav{position:fixed;bottom:0;left:0;right:0;background:#0d0e16ee;backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:20;padding:8px max(8px,calc((100vw - 1100px)/2))}.nav button{background:transparent;padding:8px 11px;color:var(--muted);font-size:11px;min-width:62px}.nav button.active{color:var(--accent)}.nav span{display:block;font-size:18px;margin-bottom:2px}.section{padding:0 16px;margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center}.section h2{font-size:18px;margin:0}.modal{position:fixed;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{background:#11131e;border:1px solid var(--line);border-radius:25px 25px 0 0;width:100%;max-height:88vh;overflow:auto;padding:20px}.sheet h2{margin-top:0}.field{margin:10px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field select,.field input{width:100%;background:#0b0c13;border:1px solid var(--line);border-radius:11px;padding:11px;color:var(--text)}
+.rink{height:270px;border-radius:22px;background:linear-gradient(#dfe9f5,#b8cce0);position:relative;overflow:hidden;border:7px solid #fff}.rink:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid #df4e67}.rink:after{content:"";position:absolute;width:130px;height:130px;border:2px solid #5a79c7;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.skaterAnim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:70px;animation:glide 2s infinite ease-in-out}.phase{position:absolute;bottom:12px;left:12px;background:#0009;color:#fff;border-radius:10px;padding:7px 10px;font-size:12px}@keyframes glide{0%,100%{transform:translate(-55%,-50%) rotate(-3deg)}50%{transform:translate(-45%,-50%) rotate(3deg)}}.notice{padding:12px;border-radius:13px;background:#181b29;border:1px solid var(--line);font-size:13px;line-height:1.45}.positive{border-color:#315e50}.negative{border-color:#633043}.hidden{display:none!important}
+@media(min-width:760px){.grid{grid-template-columns:repeat(3,1fr)}.hero{padding:32px}.sheet{max-width:700px;margin:auto;border-radius:25px;margin-bottom:20px}.modal{align-items:center}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const regions={
+Europe:["Fédération solide","densité de compétitions élevée"],
+Asie:["infrastructures et vivier technique","voyages internationaux coûteux"],
+"Amérique du Nord":["sponsors et visibilité","pression médiatique élevée"],
+"Amérique du Sud":["marché en croissance","moins d'événements locaux"],
+Océanie:["environnement stable","longs déplacements"],
+Afrique:["fort potentiel de développement","financement/infrastructures plus limités"]
+};
+const countries=["France","Japon","États-Unis","Canada","Italie","Belgique","Suisse","Allemagne","Espagne","Royaume-Uni","Finlande","Suède","Norvège","Danemark","Pologne","Tchéquie","Slovaquie","Hongrie","Autriche","Géorgie","Arménie","Estonie","Lettonie","Lituanie","Ukraine","Chine","Corée du Sud","Kazakhstan","Ouzbékistan","Australie","Nouvelle-Zélande","Brésil","Argentine","Chili","Mexique","Afrique du Sud","Maroc","Égypte","Israël","Turquie"];
+const first=["Elena","Maya","Lina","Sofia","Clara","Naomi","Yuna","Mila","Iris","Ava","Nora","Alina","Léa","Inès","Amelia","Eva","Kiara","Mia","Anna","Sara"];
+const last=["Moreau","Tanaka","Kowalski","Rossi","Kim","Dubois","Ivanova","Martin","Sato","Laurent","Garcia","Müller","Andersson","Petrova","Lee","Silva","Novak","Wilson","Chen","Davis"];
+const styles=["Élégante","Dramatique","Athlétique","Artistique","Classique","Expérimentale","Fluide","Explosive"];
+const hairs=["Chignon classique","Queue haute","Cheveux lâchés","Demi-queue","Tresse","Wet look","Chignon bas","Queue basse"];
+const makeup=["Naturel","Soft glam","Smoky","Glitter","Editorial","Rosé","Dramatique","Ice glam"];
+const outfits=["Noir couture","Blanc cristal","Rose ballet","Rouge scène","Bleu glacier","Argent miroir","Violet royal","Custom couture"];
+const music=["Classique romantique","Piano dramatique","Électro cinématique","Ballet contemporain","Rock orchestral","Pop symphonique","Ambient futuriste","Tango"];
+const events=[
+["Grand Prix de France","France","GP"],["Skate Canada","Canada","GP"],["Cup of China","Chine","GP"],["Skate America","États-Unis","GP"],["NHK Trophy","Japon","GP"],["Grand Prix Final","International","GPF"],["Championnats d'Europe","Europe","EURO"],["Four Continents","International","4CC"],["Championnats du Monde","International","WORLD"],["World Team Trophy","Japon","WTT"]
+];
+let state=JSON.parse(localStorage.getItem("skateLegacy")||"null")||null;
+function save(){localStorage.setItem("skateLegacy",JSON.stringify(state))}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function makeSkater(i,team=false){
+ let nm=first[i%first.length]+" "+last[(i*3)%last.length];
+ return {id:Date.now()+i+Math.random(),name:nm,country:team?state.country:countries[(i*5+2)%countries.length],age:rnd(15,25),ovr:rnd(66,86)+(team?4:0),pot:rnd(78,98),form:rnd(60,88),morale:rnd(65,95),energy:rnd(70,100),style:styles[i%styles.length],hair:hairs[i%hairs.length],makeup:makeup[i%makeup.length],outfit:outfits[i%outfits.length],music:music[i%music.length],coach:"Coach "+["Aurora","Mika","Valentina","Noah","Sienna"][i%5],injury:0,wins:0,podiums:0,points:0,rel:rnd(40,80)}
+}
+function init(){
+ let region=document.getElementById("region").value,country=document.getElementById("country").value,name=document.getElementById("club").value.trim()||"Legacy Academy";
+ state={region,country,club:name,season:2026,week:1,cash:120000,level:1,fans:100,team:Array.from({length:8},(_,i)=>makeSkater(i,true)),rivals:Array.from({length:24},(_,i)=>makeSkater(i+20,false)),news:[`Bienvenue à ${name}. Ton institut commence sa carrière internationale.`],ach:[],results:[],calendar:events.map((e,i)=>({name:e[0],place:e[1],type:e[2],week:i*3+2,done:false})),coaches:["Aurora","Mika","Valentina","Noah","Sienna"]};
+ save();render("home")
+}
+function nav(){return `<div class="nav">${[["home","⌂","Accueil"],["team","♙","Équipe"],["calendar","◷","ISU"],["ranking","♛","Classements"],["news","◈","News"]].map(x=>`<button class="${view===x[0]?'active':''}" onclick="render('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join("")}</div>`}
+let view="home";
+function shell(content){document.getElementById("app").innerHTML=`<div class="app"><div class="top"><div class="logo">SKATE LEGACY</div><div class="pill">S${state.season} · Niv.${state.level} · ${state.fans} fans</div></div>${content}</div>${nav()}<div id="modal" class="modal" onclick="if(event.target.id==='modal')closeModal()"></div>`}
+function render(v){view=v;if(!state){start();return}if(v==="home")home();if(v==="team")team();if(v==="calendar")calendar();if(v==="ranking")ranking();if(v==="news")news()}
+function home(){
+ let s=state.team.reduce((a,b)=>a+b.ovr,0)/8;
+ shell(`<div class="hero"><h1>${state.club}</h1><p>${state.region} · ${state.country}<br><b>OVR institut ${Math.round(s)}</b> · Trésorerie ${state.cash.toLocaleString("fr-FR")} €</p><div class="row"><button class="btn" onclick="trainMenu()">Entraîner</button><button class="btn secondary" onclick="advance()">Passer la semaine</button></div></div>
+ <div class="section"><h2>Prochain objectif</h2><span class="muted">Semaine ${state.week}</span></div><div class="grid">
+ <div class="card"><h3>Équipe</h3><div class="score">${state.team.length}</div><div class="muted">patineuses sous contrat</div></div>
+ <div class="card"><h3>Palmarès</h3><div class="score">${state.results.filter(x=>x.place===1).length}</div><div class="muted">victoires</div></div>
+ <div class="card"><h3>Dernière news</h3><div class="muted">${state.news[0]}</div></div>
+ </div><div class="section"><h2>À surveiller</h2></div><div class="grid">${state.team.slice(0,3).map(cardSkater).join("")}</div>`)
+}
+function cardSkater(s){return `<div class="card skater" onclick="openSkater('${s.id}')"><div class="row"><div class="avatar">${s.name[0]}</div><div><div class="name">${s.name}</div><div class="muted">${s.country} · ${s.style}</div></div></div><div><div class="score">${s.ovr}</div><div class="muted">OVR</div></div></div>`}
+function team(){shell(`<div class="section"><h2>Mon institut</h2><button class="btn secondary" onclick="hire()">Recruter</button></div><div class="grid">${state.team.map(cardSkater).join("")}</div>`)}
+function calendar(){shell(`<div class="section"><h2>Calendrier carrière</h2><span class="muted">inspiré des grands formats ISU</span></div><div class="grid">${state.calendar.map((e,i)=>`<div class="card"><h3>${e.name}</h3><div class="muted">${e.place} · S${e.week} · ${e.type}</div><br>${e.done?`<span class="tag">TERMINÉ</span>`:`<button class="btn" onclick="enterEvent(${i})">Préparer</button>`}</div>`).join("")}</div>`)}
+function ranking(){
+ let all=[...state.team,...state.rivals].sort((a,b)=>(b.points+b.ovr*2+b.wins*30)-(a.points+a.ovr*2+a.wins*30));
+ shell(`<div class="section"><h2>Classement mondial simulé</h2><span class="muted">jeu</span></div><div class="grid">${all.slice(0,30).map((s,i)=>`<div class="card skater"><div class="row"><div class="avatar">${i+1}</div><div><div class="name">${s.name}</div><div class="muted">${s.country} · ${s.coach}</div></div></div><div class="score">${s.points}</div></div>`).join("")}</div><div class="section"><h2>Classement coachs</h2></div><div class="grid">${state.coaches.map((c,i)=>`<div class="card"><b>#${i+1} ${c}</b><div class="bar"><div class="fill" style="width:${92-i*7}%"></div></div></div>`).join("")}</div>`)
+}
+function news(){shell(`<div class="section"><h2>News du monde du patinage</h2></div><div class="grid">${state.news.map((n,i)=>`<div class="card"><span class="tag">S${Math.max(1,state.week-i)}</span><p>${n}</p></div>`).join("")}</div>`)}
+function start(){document.getElementById("app").innerHTML=`<div class="app"><div class="hero" style="margin-top:35vh;transform:translateY(-20%)"><div class="logo">SKATE LEGACY</div><h1>Deviens manager de patinage artistique.</h1><p>Construis ton institut, développe tes patineuses, prépare leurs performances et écris leur histoire.</p>
+<div class="field"><label>Région</label><select id="region">${Object.keys(regions).map(r=>`<option>${r}</option>`).join("")}</select></div><div class="field"><label>Pays</label><select id="country">${countries.map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>Nom de l'institut</label><input id="club" placeholder="Ex. KALIS SKATING ACADEMY"></div><button class="btn" style="width:100%;margin-top:8px" onclick="init()">Commencer la carrière</button></div></div>`}
+function openSkater(id){
+ let s=state.team.find(x=>String(x.id)===String(id));if(!s)return;
+ modal(`<h2>${s.name}</h2><div class="muted">${s.country} · ${s.age} ans · ${s.coach}</div>
+ <div class="grid" style="padding:0;margin-top:12px"><div class="card"><b>OVR ${s.ovr}</b><div class="stat"><span>Forme</span><b>${s.form}</b></div><div class="bar"><div class="fill" style="width:${s.form}%"></div></div><div class="stat"><span>Moral</span><b>${s.morale}</b></div><div class="stat"><span>Énergie</span><b>${s.energy}</b></div><div class="stat"><span>Potentiel</span><b>${s.pot}</b></div></div>
+ <div class="card"><h3>Style</h3><div class="stat"><span>Coiffure</span><b>${s.hair}</b></div><div class="stat"><span>Make-up</span><b>${s.makeup}</b></div><div class="stat"><span>Tenue</span><b>${s.outfit}</b></div><div class="stat"><span>Musique</span><b>${s.music}</b></div></div></div>
+ <div class="row" style="margin-top:12px"><button class="btn" onclick="customize('${s.id}')">Personnaliser</button><button class="btn secondary" onclick="closeModal()">Fermer</button></div>`)
+}
+function customize(id){
+ let s=state.team.find(x=>String(x.id)===String(id));
+ modal(`<h2>Préparer ${s.name}</h2>${[['hair','Coiffure',hairs],['makeup','Make-up',makeup],['outfit','Tenue',outfits],['music','Musique',music]].map(a=>`<div class="field"><label>${a[1]}</label><select id="c_${a[0]}">${a[2].map(x=>`<option ${x===s[a[0]]?'selected':''}>${x}</option>`).join("")}</select></div>`).join("")}<div class="row"><button class="btn" onclick="saveCustom('${s.id}')">Enregistrer</button><button class="btn secondary" onclick="openSkater('${s.id}')">Annuler</button></div>`)
+}
+function saveCustom(id){let s=state.team.find(x=>String(x.id)===String(id));["hair","makeup","outfit","music"].forEach(k=>s[k]=document.getElementById("c_"+k).value);s.form=Math.min(100,s.form+3);save();openSkater(id)}
+function trainMenu(){modal(`<h2>Centre d'entraînement</h2><p class="muted">Choisis une spécialité. L'énergie limite le surentraînement.</p>${[['Technique','technical'],['Chorégraphie','choreo'],['Physique','physical'],['Repos','rest']].map(x=>`<button class="btn secondary" style="width:100%;margin:6px 0;text-align:left" onclick="train('${x[1]}')">${x[0]}</button>`).join("")}`)}
+function train(type){closeModal();state.team.forEach(s=>{if(type==="rest"){s.energy=Math.min(100,s.energy+18);s.morale=Math.min(100,s.morale+3)}else{s.energy=Math.max(0,s.energy-rnd(5,12));s.form=Math.min(100,s.form+rnd(2,6));if(Math.random()<.08&&s.energy<35){s.injury=rnd(1,3);s.morale-=12;state.news.unshift(`⚠️ ${s.name} souffre d'une blessure et doit alléger son entraînement.`)}}});if(type!=="rest"&&Math.random()<.35){let s=state.team[rnd(0,7)];s.ovr=Math.min(99,s.ovr+1);state.news.unshift(`📈 ${s.name} franchit un cap technique à l'entraînement.`)}save();render("home")}
+function advance(){
+ state.week++;state.team.forEach(s=>{s.energy=Math.min(100,s.energy+rnd(4,12));if(s.injury>0)s.injury--;if(s.morale<60&&Math.random()<.25){s.morale+=8;state.news.unshift(`💬 ${s.name} retrouve confiance après une discussion avec le staff.`)}});
+ if(Math.random()<.28){let s=state.team[rnd(0,7)], positives=["📸 Une interview fait monter la popularité de ","✨ Une vidéo d'entraînement devient virale : ","🤝 Un sponsor contacte "];let p=positives[rnd(0,2)];state.news.unshift(p+s.name+".");state.fans+=rnd(10,35);state.cash+=rnd(3000,12000)}
+ if(Math.random()<.14){let s=state.team[rnd(0,7)];s.morale=Math.max(15,s.morale-15);state.news.unshift(`📰 Déception : ${s.name} apprend qu'elle n'est pas retenue pour une sélection nationale.`)}
+ if(state.week%4===0){state.level++;state.cash+=15000;state.news.unshift(`🏆 Ton institut atteint le niveau ${state.level}.`)}
+ save();render("home")
+}
+function enterEvent(i){
+ let e=state.calendar[i];if(e.done)return;
+ let eligible=state.team.filter(s=>s.energy>25&&!s.injury);if(!eligible.length){modal(`<h2>Impossible d'engager une patineuse</h2><p>Aucune patineuse n'est actuellement disponible. Repose ton équipe.</p><button class="btn" onclick="closeModal()">OK</button>`);return}
+ modal(`<h2>${e.name}</h2><p class="muted">${e.place} · semaine ${e.week}</p><div class="grid" style="padding:0">${eligible.map(s=>`<div class="card skater"><div><b>${s.name}</b><div class="muted">OVR ${s.ovr} · énergie ${s.energy}</div></div><button class="btn" onclick="perform(${i},'${s.id}')">Patiner</button></div>`).join("")}</div><button class="btn secondary" onclick="closeModal()">Annuler</button>`)
+}
+function perform(i,id){
+ let s=state.team.find(x=>String(x.id)===String(id)),e=state.calendar[i];closeModal();modal(`<h2>${s.name} — ${e.name}</h2><div class="rink"><div class="skaterAnim">⛸️</div><div class="phase" id="phase">Entrée sur la glace…</div></div><div id="liveScore" class="card" style="margin-top:12px;text-align:center"><div class="muted">Programme en cours</div><div class="score">—</div></div>`);
+ let phases=["Entrée","Sauts","Pirouettes","Séquence de pas","Combinaison","Chorégraphie","Pose finale"],k=0;
+ let timer=setInterval(()=>{document.getElementById("phase").textContent=phases[k]+"…";k++;if(k>=phases.length){clearInterval(timer);finishPerformance(i,id)}},550)
+}
+function finishPerformance(i,id){
+ let s=state.team.find(x=>String(x.id)===String(id)),e=state.calendar[i];
+ let fall=Math.random()<Math.max(.025,(100-s.form)/500)*(s.energy<40?1.5:1);
+ let base=72+(s.ovr*.32)+(s.form*.10)+(s.morale*.04)+rnd(-5,5),tes=base*.55+(fall?-9:0),pcs=base*.45,score=Math.max(20,tes+pcs);
+ let sorted=[...state.rivals,...state.team.filter(x=>x!==s)].map(x=>({s:x,v:65+x.ovr*.35+rnd(-9,9)})).sort((a,b)=>b.v-a.v);let place=1+sorted.filter(x=>x.v>score).length;
+ let pts=Math.max(5,Math.round((31-place)*2+score/8));s.points+=pts;s.energy=Math.max(0,s.energy-25);if(place===1)s.wins++;if(place<=3)s.podiums++;state.cash+=place===1?18000:place<=3?9000:3000;state.fans+=place<=3?rnd(20,60):rnd(5,20);state.calendar[i].done=true;state.results.push({event:e.name,skater:s.name,place,score:Math.round(score*100)/100});state.week=Math.max(state.week,e.week);
+ let ach=[];if(s.wins===1&&!state.ach.includes("first")){state.ach.push("first");ach.push("Premier titre")}if(s.podiums>=1&&!state.ach.includes("podium")){state.ach.push("podium");ach.push("Premier podium")}if(state.results.length>=5&&!state.ach.includes("five")){state.ach.push("five");ach.push("5 performances")}
+ state.news.unshift(`${place===1?"🥇":place<=3?"🏆":"📣"} ${s.name} termine ${place===1?"1re":place+"e"} à ${e.name} avec ${score.toFixed(2)} points.${fall?" Une chute a pénalisé le programme.":""}`);
+ save();
+ document.getElementById("modal").innerHTML=`<div class="sheet"><h2>Résultat</h2><div class="rink"><div class="skaterAnim">${fall?"💫":"⛸️"}</div></div><div class="card" style="margin-top:12px;text-align:center"><div class="muted">${s.name}</div><div class="score">${score.toFixed(2)}</div><div>${place===1?"🥇":place<=3?"🥈/🥉":"Classement"} · ${place}e place</div><div class="stat"><span>TES simulé</span><b>${tes.toFixed(2)}</b></div><div class="stat"><span>PCS simulé</span><b>${pcs.toFixed(2)}</b></div><div class="stat"><span>Points carrière</span><b>+${pts}</b></div>${fall?'<div class="notice negative">Chute détectée : perte de points et de confiance.</div>':''}${ach.length?'<div class="notice positive">🏆 Accomplissement : '+ach.join(", ")+"</div>":""}</div><button class="btn" style="width:100%;margin-top:12px" onclick="closeModal();render('home')">Continuer</button></div>`
+}
+function hire(){let cost=18000;if(state.cash<cost){modal(`<h2>Budget insuffisant</h2><p>Il faut ${cost.toLocaleString("fr-FR")} € pour recruter.</p><button class="btn" onclick="closeModal()">OK</button>`);return}let s=makeSkater(state.team.length+4,true);s.name=first[rnd(0,first.length-1)]+" "+last[rnd(0,last.length-1)];state.team.push(s);state.cash-=cost;state.news.unshift(`📝 Nouvelle recrue : ${s.name} rejoint ${state.club}.`);save();render("team")}
+function modal(c){let m=document.getElementById("modal");if(!m){render(view);m=document.getElementById("modal")}m.innerHTML=`<div class="sheet">${c}</div>`;m.classList.add("open")}
+function closeModal(){let m=document.getElementById("modal");if(m)m.classList.remove("open")}
+start();
+</script>
+</body></html>
