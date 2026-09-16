@@ -118,5 +118,23 @@ function hire(){let cost=18000;if(state.cash<cost){modal(`<h2>Budget insuffisant
 function modal(c){let m=document.getElementById("modal");if(!m){render(view);m=document.getElementById("modal")}m.innerHTML=`<div class="sheet">${c}</div>`;m.classList.add("open")}
 function closeModal(){let m=document.getElementById("modal");if(m)m.classList.remove("open")}
 start();
+<script>
+function startCareer() {
+    const app = document.getElementById("app");
+
+    if (!app) {
+        alert("Erreur : écran du jeu introuvable.");
+        return;
+    }
+
+    app.innerHTML = `
+        <div class="screen">
+            <h1>🏆 SKATE LEGACY</h1>
+            <h2>Carrière commencée !</h2>
+            <p>Bienvenue dans ta carrière de manager.</p>
+            <button onclick="location.reload()">Retour</button>
+        </div>
+    `;
+}
 </script>
 </body></html>
