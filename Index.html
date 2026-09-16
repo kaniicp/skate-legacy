@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SKATE LEGACY</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090b12;color:#f5f5f7;font-family:Inter,system-ui,-apple-system,sans-serif}
+button,select{font:inherit}button{border:0;border-radius:14px;padding:13px 16px;background:#f2f2f5;color:#111;font-weight:800;cursor:pointer}button:active{transform:scale(.98)}
+.wrap{max-width:760px;margin:auto;padding:18px}.brand{font-size:28px;font-weight:950;letter-spacing:2px}.muted{color:#9da1ad}.card{background:#141722;border:1px solid #252a38;border-radius:20px;padding:18px;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#0f121b;border-radius:14px;padding:12px}.big{font-size:32px;font-weight:900}.title{font-size:21px;font-weight:900;margin:4px 0 12px}.primary{background:#fff}.dark{background:#242938;color:#fff}.danger{background:#5d2630;color:#fff}.pill{display:inline-block;padding:6px 9px;border-radius:999px;background:#242938;margin:3px;font-size:12px}.nav{position:sticky;bottom:0;background:#0c0e15dd;backdrop-filter:blur(12px);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px 4px;margin:12px -4px 0}.nav button{padding:10px 4px;background:#171b27;color:#bbb;font-size:11px}.nav button.active{background:#fff;color:#111}.skater{display:flex;gap:12px;align-items:center}.avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#fff,#777);color:#111;font-weight:950;font-size:20px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.bar{height:8px;background:#292e3b;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:#eee}.menu{display:grid;gap:9px}.menu button{text-align:left}.small{font-size:12px}.center{text-align:center}.score{font-size:54px;font-weight:950}.performance{min-height:380px;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 35%,#293047,#10131d 60%);border-radius:22px}.flash{font-size:28px;font-weight:950;animation:pop .5s ease}@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr 1fr}.wrap{padding:12px}.big{font-size:26px}}
+</style>
+</head>
+<body><div id="app"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const countries=["France","Canada","Japon","États-Unis","Italie","Belgique","Géorgie","Kazakhstan","Finlande","Suède","Suisse","Allemagne","Tchéquie","Australie","Corée du Sud","Pologne","Ukraine","Royaume-Uni","Espagne","Autriche"];
+const regions=["Europe","Amérique du Nord","Asie","Océanie","Autre"];
+const styles=["Élégante","Dramatique","Athlétique","Artistique","Classique","Moderne"];
+const hairs=["Chignon classique","Queue haute","Ondulations","Demi-queue","Tresse","Carré"];
+const makeups=["Naturel","Soft glam","Smoky","Glitter","Rosé","Dramatique"];
+const outfits=["Blanc cristal","Noir couture","Rouge scène","Rose couture","Bleu glace","Argent"];
+const musics=["Classique","Piano dramatique","Pop","Cinématique","Électro","Ballet"];
+const names=["Amélie Laurent","Maya Dubois","Sofia Marin","Elena Rossi","Yuna Sato","Mila Novak","Clara Weiss","Nina Keller","Léa Morel","Aiko Tanaka","Emma Collins","Alina Petrova","Sara Kim","Julia Meyer","Eva Laurent","Mia Carter","Lina Costa","Anya Volkova","Chloé Martin","Naomi Lee"];
+const coaches=["Claire Beaumont","Sophie Laurent","Mika Tanaka","Daniel Moreau","Elena Rossi","Thomas Keller"];
+let state=JSON.parse(localStorage.getItem("skateLegacySave")||"null");
+function fresh(){
+ let team=[0,1,2,3].map((i)=>({id:i,name:names[i],country:"France",age:16+i,ovr:72+i*3,pot:90-i,form:70,morale:78,energy:88,style:styles[i],hair:hairs[i],makeup:makeups[i],outfit:outfits[i],music:musics[i],coach:coaches[i%coaches.length],injury:0,wins:0,podiums:0,points:0}));
+ let rivals=names.slice(4).map((n,i)=>({id:100+i,name:n,country:countries[(i+2)%countries.length],age:15+(i%7),ovr:68+(i*3)%25,pot:82+(i%18),form:65+(i*7)%30,morale:70+(i*5)%25,energy:80+(i*3)%20,style:styles[i%styles.length],hair:hairs[i%hairs.length],makeup:makeups[i%makeups.length],outfit:outfits[i%outfits.length],music:musics[i%musics.length],coach:coaches[i%coaches.length],injury:0,wins:0,podiums:0,points:0}));
+ return {started:false,region:"",country:"France",institute:"",season:2026,week:1,money:100000,reputation:10,selected:0,team,rivals,news:["Bienvenue dans Skate Legacy."],achievements:[],page:"home",event:null};
+}
+if(!state)state=fresh();
+function save(){localStorage.setItem("skateLegacySave",JSON.stringify(state))}
+function allSkaters(){return [...state.team,...state.rivals]}
+function sk(){return state.team[state.selected]||state.team[0]}
+function nav(){return `<div class="nav">
+<button data-action="page" data-page="home" class="${state.page==="home"?"active":""}">🏠<br>Accueil</button>
+<button data-action="page" data-page="team" class="${state.page==="team"?"active":""}">⛸️<br>Équipe</button>
+<button data-action="page" data-page="calendar" class="${state.page==="calendar"?"active":""}">📅<br>Événements</button>
+<button data-action="page" data-page="ranking" class="${state.page==="ranking"?"active":""}">🏆<br>Classement</button>
+<button data-action="page" data-page="news" class="${state.page==="news"?"active":""}">📰<br>News</button>
+</div>`}
+function layout(content){$("#app").innerHTML=`<div class="wrap"><div class="brand">SKATE LEGACY</div>${content}${nav()}</div>`}
+function home(){
+ if(!state.started)return start();
+ let s=sk();
+ layout(`<div class="card"><div class="muted">SAISON ${state.season}</div><div class="title">Bonjour Manager 👑</div><div class="grid3"><div class="stat"><div class="big">${state.money.toLocaleString()}€</div><span class="muted small">budget</span></div><div class="stat"><div class="big">${state.reputation}</div><span class="muted small">réputation</span></div><div class="stat"><div class="big">${state.week}</div><span class="muted small">semaine</span></div></div></div>
+ <div class="card"><div class="title">Patineuse principale</div>${skaterCard(s)}<div class="grid"><button data-action="train" data-type="technique">⚡ Technique</button><button data-action="train" data-type="choreographie">💃 Chorégraphie</button><button data-action="train" data-type="physique">🏋️ Physique</button><button data-action="rest">😴 Repos</button></div></div>
+ <div class="card"><div class="title">Prochain événement</div><p>${eventName()}</p><button class="primary" data-action="event">Entrer dans l'événement</button></div>`);
+}
+function start(){
+ $("#app").innerHTML=`<div class="wrap"><div class="brand">SKATE LEGACY</div><div class="card"><div class="title">Crée ta carrière</div>
+ <p class="muted">Choisis ton point de départ et dirige ton institut.</p>
+ <label>Région</label><select id="region" style="width:100%;padding:13px;margin:7px 0 12px;border-radius:12px">${regions.map(x=>`<option>${x}</option>`).join("")}</select>
+ <label>Pays</label><select id="country" style="width:100%;padding:13px;margin:7px 0 12px">${countries.map(x=>`<option ${x==="France"?"selected":""}>${x}</option>`).join("")}</select>
+ <label>Nom de l'institut</label><input id="institute" value="Legacy Skating Academy" style="width:100%;padding:13px;margin:7px 0 18px;border-radius:12px;border:0">
+ <button class="primary" style="width:100%" data-action="start">COMMENCER LA CARRIÈRE</button></div></div>`;
+}
+function skaterCard(s){return `<div class="skater"><div class="avatar">${esc(s.name[0])}</div><div style="flex:1"><b>${esc(s.name)}</b><div class="muted small">${s.country} · ${s.age} ans · ${s.style}</div><div class="bar"><i style="width:${s.ovr}%"></i></div></div><b>${s.ovr}</b></div>`}
+function team(){
+ layout(`<div class="card"><div class="title">Mon équipe</div>${state.team.map((s,i)=>`<div class="card"><div class="row">${skaterCard(s)}<button data-action="select" data-id="${i}">${i===state.selected?"✓":"Choisir"}</button></div></div>`).join("")}
+ <button data-action="customize">✨ Personnaliser la patineuse</button></div>`);
+}
+function customize(){
+ let s=sk(); state.page="custom";
+ layout(`<div class="card"><div class="title">✨ Personnalisation</div>${skaterCard(s)}
+ ${selectBox("Coiffure","hair",hairs,s.hair)}${selectBox("Make-up","makeup",makeups,s.makeup)}${selectBox("Tenue","outfit",outfits,s.outfit)}${selectBox("Musique","music",musics,s.music)}${selectBox("Style","style",styles,s.style)}
+ <button class="primary" data-action="savecustom">ENREGISTRER</button></div>`);
+}
+function selectBox(label,key,arr,val){return `<label>${label}</label><select data-custom="${key}" style="width:100%;padding:12px;margin:6px 0 12px">${arr.map(x=>`<option ${x===val?"selected":""}>${x}</option>`).join("")}</select>`}
+function calendar(){
+ let events=["Grand Prix de France","Skate Canada","Cup of China","Skate America","NHK Trophy","Grand Prix Final","Championnats d'Europe","Quatre Continents","Championnats du Monde","World Team Trophy"];
+ layout(`<div class="card"><div class="title">Calendrier ISU — simulation</div>${events.map((e,i)=>`<div class="row card"><span><b>${e}</b><br><span class="muted small">Semaine ${i+1}</span></span><button data-action="event" data-event="${i}">Voir</button></div>`).join("")}</div>`);
+}
+function eventName(){return ["Grand Prix de France","Skate Canada","Cup of China","Skate America","NHK Trophy","Grand Prix Final","Championnats d'Europe","Quatre Continents","Championnats du Monde","World Team Trophy"][(state.week-1)%10]}
+function ranking(){
+ let r=allSkaters().sort((a,b)=>b.points-a.points||b.ovr-a.ovr);
+ layout(`<div class="card"><div class="title">Classement mondial — simulation</div>${r.slice(0,20).map((s,i)=>`<div class="row card"><span><b>#${i+1} ${esc(s.name)}</b><br><span class="muted small">${s.country} · OVR ${s.ovr}</span></span><b>${s.points} pts</b></div>`).join("")}</div>`);
+}
+function news(){
+ layout(`<div class="card"><div class="title">📰 News</div>${state.news.map((n,i)=>`<div class="card">${esc(n)}<div class="muted small">Semaine ${state.week-i}</div></div>`).join("")}</div>
+ <div class="card"><div class="title">Accomplissements</div>${state.achievements.length?state.achievements.map(x=>`<span class="pill">🏅 ${esc(x)}</span>`).join(""):"Aucun pour le moment."}</div>`);
+}
+function performance(){
+ let s=sk();
+ $("#app").innerHTML=`<div class="wrap"><div class="brand">SKATE LEGACY</div><div class="performance" id="perf"><div><div class="muted">${esc(eventName())}</div><div class="title">${esc(s.name)}</div><div class="flash" id="phase">Entrée sur la glace…</div></div></div></div>`;
+ let phases=["Glisse et carres","Sauts","Pirouettes","Séquence chorégraphique","Combinaison","Pose finale"];
+ let i=0; let timer=setInterval(()=>{if(i<phases.length){$("#phase").textContent=phases[i++]}else{clearInterval(timer);finishPerformance()}},650);
+}
+function finishPerformance(){
+ let s=sk(); let fall=Math.random()<Math.max(.05,(100-s.energy)/500);
+ let tes=Math.round(32+s.ovr*.28+s.form*.12+(Math.random()*8-4)-(fall?7:0));
+ let pcs=Math.round(30+s.ovr*.25+s.morale*.12+(Math.random()*7-3));
+ let total=tes+pcs; let rivals=state.rivals.map(x=>32+x.ovr*.28+x.form*.12+Math.random()*10).sort((a,b)=>b-a);
+ let place=1+rivals.filter(x=>x>total).length; let pts=Math.max(5,Math.round((25-place)*2.2));
+ s.points+=pts;s.form=Math.min(100,s.form+(fall?-4:4));s.energy=Math.max(25,s.energy-(fall?18:12));s.morale=Math.min(100,s.morale+(place<=3?8:-4));
+ if(place===1)s.wins++;if(place<=3)s.podiums++;state.money+=place<=3?8000:1500;state.reputation+=place===1?3:place<=3?1:0;
+ state.news.unshift(`${s.name} termine ${place}e à ${eventName()} avec ${total.toFixed(2)} points.${fall?" Une chute a été signalée.":""}`);
+ if(s.wins>=3&&!state.achievements.includes("Première étoile"))state.achievements.push("Première étoile");
+ state.week++;save();
+ $("#app").innerHTML=`<div class="wrap"><div class="brand">SKATE LEGACY</div><div class="card center"><div class="muted">${esc(eventName())}</div><div class="score">${total.toFixed(2)}</div><h2>${place}e place</h2><p>TES ${tes.toFixed(2)} · PCS ${pcs.toFixed(2)} · +${pts} pts</p>${fall?'<p class="pill">⚠️ Chute</p>':'<p class="pill">✨ Programme propre</p>'}<br><button class="primary" data-action="page" data-page="home">Continuer</button></div></div>`;
+}
+function train(type){
+ let s=sk();
+ if(s.energy<20){state.news.unshift(`${s.name} est trop fatiguée pour s'entraîner.`);return save(),home()}
+ s.energy=Math.max(10,s.energy-15);s.morale=Math.max(0,s.morale-1);
+ if(type==="technique")s.ovr=Math.min(99,s.ovr+1);
+ if(type==="choreographie")s.form=Math.min(100,s.form+5);
+ if(type==="physique")s.energy=Math.min(100,s.energy+3);
+ state.news.unshift(`${s.name} a effectué une séance de ${type}.`);
+ save();home();
+}
+function randomEvent(){
+ let s=sk();let r=Math.random();
+ if(r<.10){s.injury=2;s.energy=25;state.news.unshift(`🚑 ${s.name} s'est blessée à l'entraînement. Deux semaines de récupération.`)}
+ else if(r<.20){s.morale=Math.max(0,s.morale-15);state.news.unshift(`😔 ${s.name} est déçue de ne pas avoir été retenue pour une sélection.`)}
+ else if(r<.30){s.morale=Math.min(100,s.morale+12);state.reputation++;state.news.unshift(`📸 ${s.name} devient virale après une séance photo.`)}
+}
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-action]");if(!b)return;
+ const a=b.dataset.action;
+ if(a==="start"){state.started=true;state.region=$("#region").value;state.country=$("#country").value;state.institute=$("#institute").value.trim()||"Legacy Skating Academy";state.page="home";save();home()}
+ else if(a==="page"){state.page=b.dataset.page;save();b.dataset.page==="home"?home():b.dataset.page==="team"?team():b.dataset.page==="calendar"?calendar():b.dataset.page==="ranking"?ranking():news()}
+ else if(a==="select"){state.selected=+b.dataset.id;save();team()}
+ else if(a==="customize")customize()
+ else if(a==="savecustom"){document.querySelectorAll("[data-custom]").forEach(x=>sk()[x.dataset.custom]=x.value);state.page="team";save();team()}
+ else if(a==="train")train(b.dataset.type)
+ else if(a==="rest"){sk().energy=Math.min(100,sk().energy+30);sk().morale=Math.min(100,sk().morale+3);randomEvent();save();home()}
+ else if(a==="event")performance();
+});
+home();
+</script></body></html>
