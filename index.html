@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICE DREAMS — Career Manager</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --panel: #111827;
+    --panel2: #1a2332;
+    --accent: #38bdf8;
+    --accent2: #7dd3fc;
+    --gold: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --success: #34d399;
+    --danger: #f87171;
+    --border: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  .app { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 240px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .logo {
+    padding: 0 20px 24px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent2);
+  }
+  .logo span { color: var(--gold); }
+  .nav-item {
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all .15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover, .nav-item.active {
+    background: var(--panel2);
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 { font-size: 1.6rem; font-weight: 600; }
+  .meta { color: var(--muted); font-size: .95rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h3 { font-size: .9rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-big { font-size: 2rem; font-weight: 700; }
+  .bar {
+    height: 8px;
+    background: #1e293b;
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width .4s; }
+  .btn {
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 6px 12px; font-size: .85rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: .85rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
+  }
+  .modal-content {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+  input, select, textarea {
+    width: 100%;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 6px;
+  }
+  label { font-size: .9rem; color: var(--muted); }
+  .form-group { margin-bottom: 16px; }
+  .flex { display: flex; gap: 12px; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .badge-green { background: #064e3b; color: #34d399; }
+  .badge-red { background: #7f1d1d; color: #fca5a5; }
+  .badge-blue { background: #1e3a5f; color: #7dd3fc; }
+  .badge-gold { background: #78350f; color: #fcd34d; }
+  .notif {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--panel2); border: 1px solid var(--accent);
+    padding: 14px 20px; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    z-index: 200; max-width: 320px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } }
+  .hidden { display: none !important; }
+  @media (max-width: 768px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 10px; }
+    .nav-item { padding: 10px 14px; white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; }
+    .nav-item.active { border-bottom-color: var(--accent); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Écran d'accueil -->
+  <div id="screen-home" class="screen active" style="max-width:600px;margin:80px auto;text-align:center;padding:20px;">
+    <h1 style="font-size:2.8rem;margin-bottom:8px;">ICE <span style="color:var(--gold)">DREAMS</span></h1>
+    <p style="color:var(--muted);margin-bottom:40px;">Career Manager — Patinage Artistique</p>
+    <div class="flex" style="justify-content:center;">
+      <button class="btn" onclick="startNewCareer()">Nouvelle carrière</button>
+      <button class="btn btn-outline" onclick="loadGame()">Continuer</button>
+    </div>
+  </div>
+
+  <!-- Création de carrière -->
+  <div id="screen-create" class="screen" style="max-width:640px;margin:40px auto;padding:20px;">
+    <h2 style="margin-bottom:24px;">Créer une patineuse</h2>
+    <div class="form-group">
+      <label>Prénom</label>
+      <input id="create-prenom" value="Léa">
+    </div>
+    <div class="form-group">
+      <label>Nom</label>
+      <input id="create-nom" value="Moreau">
+    </div>
+    <div class="form-group">
+      <label>Pays</label>
+      <select id="create-pays">
+        <option>France</option><option>Canada</option><option>Japon</option>
+        <option>États-Unis</option><option>Russie</option><option>Italie</option>
+        <option>Corée du Sud</option><option>Belgique</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Âge de départ</label>
+      <select id="create-age">
+        <option value="14">14 ans</option>
+        <option value="15" selected>15 ans</option>
+        <option value="16">16 ans</option>
+        <option value="17">17 ans</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Niveau de départ</label>
+      <select id="create-niveau">
+        <option value="amateur">Amateur (très faible réputation)</option>
+        <option value="junior" selected>Junior prometteuse</option>
+        <option value="senior">Senior montante</option>
+        <option value="star">Star établie</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Personnalité</label>
+      <select id="create-perso">
+        <option>Ambitieuse</option>
+        <option>Perfectionniste</option>
+        <option>Calme</option>
+        <option>Travailleuse acharnée</option>
+        <option>Médiatique</option>
+        <option>Sensible à la pression</option>
+        <option>Très compétitive</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Difficulté</label>
+      <select id="create-diff">
+        <option value="easy">Facile</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Difficile</option>
+        <option value="realistic">Réaliste</option>
+      </select>
+    </div>
+    <div class="flex" style="margin-top:28px;">
+      <button class="btn" onclick="confirmCreate()">Commencer la carrière</button>
+      <button class="btn btn-outline" onclick="showScreen('home')">Retour</button>
+    </div>
+  </div>
+
+  <!-- Interface principale -->
+  <div id="screen-game" class="screen">
+    <div class="app">
+      <div class="sidebar">
+        <div class="logo">ICE <span>DREAMS</span></div>
+        <div class="nav-item active" data-screen="dashboard" onclick="navTo(this)">Dashboard</div>
+        <div class="nav-item" data-screen="skater" onclick="navTo(this)">Patineuse</div>
+        <div class="nav-item" data-screen="staff" onclick="navTo(this)">Équipe</div>
+        <div class="nav-item" data-screen="training" onclick="navTo(this)">Entraînement</div>
+        <div class="nav-item" data-screen="calendar" onclick="navTo(this)">Calendrier</div>
+        <div class="nav-item" data-screen="programs" onclick="navTo(this)">Programmes</div>
+        <div class="nav-item" data-screen="competitions" onclick="navTo(this)">Compétitions</div>
+        <div class="nav-item" data-screen="scouting" onclick="navTo(this)">Scouting</div>
+        <div class="nav-item" data-screen="sponsors" onclick="navTo(this)">Sponsors</div>
+        <div class="nav-item" data-screen="finances" onclick="navTo(this)">Finances</div>
+        <div class="nav-item" data-screen="media" onclick="navTo(this)">Médias</div>
+        <div class="nav-item" data-screen="rankings" onclick="navTo(this)">Classements</div>
+        <div class="nav-item" data-screen="messages" onclick="navTo(this)">Messages</div>
+        <div style="margin-top:auto;padding:20px;">
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px;" onclick="advanceWeek()">+1 semaine</button>
+          <button class="btn btn-outline btn-sm" style="width:100%;" onclick="saveGame()">Sauvegarder</button>
+        </div>
+      </div>
+      <div class="main">
+        <div class="header">
+          <div>
+            <h1 id="header-name">—</h1>
+            <div class="meta" id="header-meta">Saison — · Semaine —</div>
+          </div>
+          <div class="flex">
+            <span class="badge badge-blue" id="header-rank">#—</span>
+            <span class="badge badge-gold" id="header-rep">Rep —</span>
+          </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" class="view">
+          <div class="grid">
+            <div class="card">
+              <h3>Prochaine compétition</h3>
+              <div id="dash-next-comp" class="stat-big" style="font-size:1.3rem;">—</div>
+              <div id="dash-next-days" style="color:var(--muted);margin-top:4px;"></div>
+            </div>
+            <div class="card">
+              <h3>Forme</h3>
+              <div class="stat-big" id="dash-forme">—%</div>
+              <div class="bar"><div class="bar-fill" id="bar-forme" style="width:0%;background:var(--success)"></div></div>
+            </div>
+            <div class="card">
+              <h3>Fatigue</h3>
+              <div class="stat-big" id="dash-fatigue">—%</div>
+              <div class="bar"><div class="bar-fill" id="bar-fatigue" style="width:0%;background:var(--danger)"></div></div>
+            </div>
+            <div class="card">
+              <h3>Confiance</h3>
+              <div class="stat-big" id="dash-confiance">—%</div>
+              <div class="bar"><div class="bar-fill" id="bar-confiance" style="width:0%;background:var(--accent)"></div></div>
+            </div>
+            <div class="card">
+              <h3>Budget</h3>
+              <div class="stat-big" id="dash-budget">$—</div>
+            </div>
+            <div class="card">
+              <h3>Réputation</h3>
+              <div class="stat-big" id="dash-rep">—</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:20px;">
+            <h3>Dernières actualités</h3>
+            <div id="dash-news"></div>
+          </div>
+        </div>
+
+        <!-- PATINEUSE -->
+        <div id="view-skater" class="view hidden">
+          <div class="grid">
+            <div class="card">
+              <h3>Identité</h3>
+              <p id="sk-identity"></p>
+              <p style="margin-top:12px;color:var(--muted)" id="sk-perso"></p>
+            </div>
+            <div class="card">
+              <h3>Potentiel global</h3>
+              <div class="stat-big" id="sk-potentiel">—</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:20px;">
+            <h3>Attributs techniques</h3>
+            <div id="sk-tech" class="grid" style="margin-top:12px;"></div>
+          </div>
+          <div class="card" style="margin-top:20px;">
+            <h3>Attributs artistiques</h3>
+            <div id="sk-art" class="grid" style="margin-top:12px;"></div>
+          </div>
+          <div class="card" style="margin-top:20px;">
+            <h3>Mental & Physique</h3>
+            <div id="sk-ment" class="grid" style="margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <!-- STAFF -->
+        <div id="view-staff" class="view hidden">
+          <div class="flex" style="margin-bottom:16px;">
+            <button class="btn" onclick="openRecruit()">Recruter</button>
+          </div>
+          <div id="staff-list"></div>
+        </div>
+
+        <!-- ENTRAÎNEMENT -->
+        <div id="view-training" class="view hidden">
+          <div class="card">
+            <h3>Planifier la semaine</h3>
+            <p style="color:var(--muted);margin-bottom:16px;">Choisis le focus principal de la semaine</p>
+            <div class="flex">
+              <button class="btn" onclick="train('technique')">Technique</button>
+              <button class="btn" onclick="train('artistique')">Artistique</button>
+              <button class="btn" onclick="train('sauts')">Sauts</button>
+              <button class="btn" onclick="train('physique')">Physique</button>
+              <button class="btn" onclick="train('mental')">Mental</button>
+              <button class="btn btn-outline" onclick="train('repos')">Repos complet</button>
+            </div>
+            <div id="train-result" style="margin-top:20px;"></div>
+          </div>
+        </div>
+
+        <!-- CALENDRIER -->
+        <div id="view-calendar" class="view hidden">
+          <div class="card">
+            <h3>Calendrier de la saison</h3>
+            <div id="cal-list"></div>
+          </div>
+        </div>
+
+        <!-- PROGRAMMES -->
+        <div id="view-programs" class="view hidden">
+          <div class="grid">
+            <div class="card">
+              <h3>Short Program</h3>
+              <div class="form-group">
+                <label>Stratégie</label>
+                <select id="sp-strategy">
+                  <option value="secure">Sécurisé</option>
+                  <option value="balanced" selected>Équilibré</option>
+                  <option value="risky">Ultra-difficile</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Musique</label>
+                <input id="sp-music" value="Moonlight Sonata">
+              </div>
+              <button class="btn btn-sm" onclick="saveProgram('short')">Enregistrer</button>
+            </div>
+            <div class="card">
+              <h3>Free Skate</h3>
+              <div class="form-group">
+                <label>Stratégie</label>
+                <select id="fs-strategy">
+                  <option value="secure">Sécurisé</option>
+                  <option value="balanced" selected>Équilibré</option>
+                  <option value="risky">Ultra-difficile</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Musique</label>
+                <input id="fs-music" value="Carmen">
+              </div>
+              <button class="btn btn-sm" onclick="saveProgram('free')">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPÉTITIONS -->
+        <div id="view-competitions" class="view hidden">
+          <div class="card">
+            <h3>Compétitions disponibles</h3>
+            <div id="comp-list"></div>
+          </div>
+        </div>
+
+        <!-- SCOUTING -->
+        <div id="view-scouting" class="view hidden">
+          <div class="card">
+            <h3>Rapports de scouting</h3>
+            <div id="scout-list"></div>
+          </div>
+        </div>
+
+        <!-- SPONSORS -->
+        <div id="view-sponsors" class="view hidden">
+          <div class="card">
+            <h3>Offres de sponsors</h3>
+            <div id="sponsor-list"></div>
+          </div>
+        </div>
+
+        <!-- FINANCES -->
+        <div id="view-finances" class="view hidden">
+          <div class="grid">
+            <div class="card"><h3>Solde actuel</h3><div class="stat-big" id="fin-solde">$—</div></div>
+            <div class="card"><h3>Revenus saison</h3><div class="stat-big" id="fin-rev">$—</div></div>
+            <div class="card"><h3>Dépenses saison</h3><div class="stat-big" id="fin-dep">$—</div></div>
+          </div>
+        </div>
+
+        <!-- MÉDIAS -->
+        <div id="view-media" class="view hidden">
+          <div class="card">
+            <h3>Demandes médias</h3>
+            <div id="media-list"></div>
+          </div>
+        </div>
+
+        <!-- CLASSEMENTS -->
+        <div id="view-rankings" class="view hidden">
+          <div class="card">
+            <h3>Classement mondial (Top 20)</h3>
+            <table>
+              <thead><tr><th>#</th><th>Nom</th><th>Pays</th><th>Points</th></tr></thead>
+              <tbody id="rank-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MESSAGES -->
+        <div id="view-messages" class="view hidden">
+          <div class="card">
+            <h3>Boîte de réception</h3>
+            <div id="msg-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DONNÉES DE BASE ====================
+const COMPETITIONS = [
+  { id: 'nat', name: 'Championnats Nationaux', level: 1, prestige: 20, prize: 3000, fatigue: 15, week: 8 },
+  { id: 'challenger', name: 'Challenger Series', level: 2, prestige: 35, prize: 8000, fatigue: 20, week: 12 },
+  { id: 'gp1', name: 'Grand Prix de France', level: 3, prestige: 55, prize: 18000, fatigue: 25, week: 18 },
+  { id: 'gp2', name: 'Skate America', level: 3, prestige: 55, prize: 18000, fatigue: 25, week: 22 },
+  { id: 'gpf', name: 'Grand Prix Final', level: 4, prestige: 80, prize: 35000, fatigue: 30, week: 28 },
+  { id: 'euro', name: 'Championnats d\'Europe', level: 4, prestige: 90, prize: 40000, fatigue: 30, week: 32 },
+  { id: 'worlds', name: 'Championnats du Monde', level: 5, prestige: 120, prize: 70000, fatigue: 35, week: 40 },
+  { id: 'olympic', name: 'Jeux Olympiques', level: 6, prestige: 200, prize: 150000, fatigue: 40, week: 48 }
+];
+
+const STAFF_POOL = [
+  { role: 'Coach principal', name: 'Elena Vasilieva', level: 78, salary: 14000, bonus: '+8% technique' },
+  { role: 'Coach technique', name: 'Hiroshi Tanaka', level: 82, salary: 16000, bonus: '+10% sauts' },
+  { role: 'Chorégraphe', name: 'Marie-Claire Dubois', level: 75, salary: 11000, bonus: '+9% artistique' },
+  { role: 'Préparateur physique', name: 'Marcus Reed', level: 70, salary: 9000, bonus: '+7% endurance' },
+  { role: 'Préparateur mental', name: 'Sophie Laurent', level: 73, salary: 8500, bonus: '+8% confiance' },
+  { role: 'Physiothérapeute', name: 'Dr. Anna Keller', level: 80, salary: 10000, bonus: '-15% risque blessure' },
+  { role: 'Agent média', name: 'Tom Bradley', level: 68, salary: 7000, bonus: '+6% réputation' }
+];
+
+const FIRST_NAMES = ['Léa','Emma','Chloe','Sofia','Yuna','Kaori','Alina','Isabella','Mia','Ava','Luna','Hana','Elena','Maya','Nora'];
+const LAST_NAMES = ['Moreau','Kim','Tanaka','Petrova','Rossi','Chen','Garcia','Schmidt','Dubois','Nakamura','Ivanova','Costa','Berg','Silva','Park'];
+const COUNTRIES = ['France','Japon','Corée du Sud','États-Unis','Canada','Italie','Russie','Belgique','Allemagne','Chine'];
+
+// ==================== ÉTAT DU JEU ====================
+let G = null; // Game state
+
+function createSkater(prenom, nom, pays, age, niveau, perso) {
+  const base = {
+    amateur: { tech: 38, art: 40, ment: 42, pot: 78 },
+    junior: { tech: 52, art: 54, ment: 50, pot: 86 },
+    senior: { tech: 68, art: 66, ment: 64, pot: 88 },
+    star: { tech: 82, art: 80, ment: 78, pot: 92 }
+  }[niveau];
+
+  return {
+    prenom, nom, pays, age,
+    personality: perso,
+    reputation: niveau === 'amateur' ? 18 : niveau === 'junior' ? 35 : niveau === 'senior' ? 58 : 78,
+    form: 75, fatigue: 15, confidence: 70,
+    money: niveau === 'amateur' ? 8000 : niveau === 'junior' ? 25000 : niveau === 'senior' ? 70000 : 180000,
+    seasonIncome: 0, seasonExpense: 0,
+    worldRank: 0, worldPoints: 0,
+    potential: base.pot + Math.floor(Math.random()*8)-3,
+    attributes: {
+      axel: base.tech + rnd(-5,5), lutz: base.tech + rnd(-5,5), flip: base.tech + rnd(-5,5),
+      loop: base.tech + rnd(-5,5), salchow: base.tech + rnd(-5,5), toe: base.tech + rnd(-5,5),
+      rotations: base.tech + rnd(-4,4), precision: base.tech + rnd(-4,4), edge: base.tech + rnd(-4,4),
+      spins: base.art + rnd(-5,5), steps: base.art + rnd(-5,5),
+      interpretation: base.art + rnd(-4,4), musicality: base.art + rnd(-4,4),
+      performance: base.art + rnd(-4,4), presence: base.art + rnd(-4,4),
+      composition: base.art + rnd(-4,4), transitions: base.art + rnd(-4,4), skatingSkills: base.art + rnd(-4,4),
+      concentration: base.ment + rnd(-5,5), pressure: base.ment + rnd(-5,5),
+      consistency: base.ment + rnd(-5,5), motivation: base.ment + rnd(-4,4), discipline: base.ment + rnd(-4,4),
+      endurance: 55 + rnd(-8,8), explosiveness: 52 + rnd(-8,8), flexibility: 60 + rnd(-8,8),
+      recovery: 50 + rnd(-8,8), injuryResist: 55 + rnd(-8,8)
+    },
+    staff: [],
+    programs: {
+      short: { strategy: 'balanced', music: 'Moonlight Sonata' },
+      free: { strategy: 'balanced', music: 'Carmen' }
+    },
+    calendar: [],
+    results: [],
+    injuries: [],
+    sponsors: [],
+    messages: [],
+    history: []
+  };
+}
+
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+function generateAISkaters(count=60){
+  const list = [];
+  for(let i=0;i<count;i++){
+    const age = rnd(15,26);
+    const pot = rnd(65,95);
+    const level = pot > 88 ? rnd(70,88) : pot > 80 ? rnd(55,75) : rnd(35,60);
+    list.push({
+      id: 'ai'+i,
+      name: FIRST_NAMES[rnd(0,FIRST_NAMES.length-1)] + ' ' + LAST_NAMES[rnd(0,LAST_NAMES.length-1)],
+      country: COUNTRIES[rnd(0,COUNTRIES.length-1)],
+      age, potential: pot,
+      points: Math.floor(level * 28 + rnd(0,400)),
+      tech: level + rnd(-6,6), art: level + rnd(-6,6)
+    });
+  }
+  return list.sort((a,b)=>b.points-a.points);
+}
+
+// ==================== INITIALISATION ====================
+function startNewCareer(){
+  showScreen('create');
+}
+
+function confirmCreate(){
+  const prenom = document.getElementById('create-prenom').value.trim() || 'Léa';
+  const nom = document.getElementById('create-nom').value.trim() || 'Moreau';
+  const pays = document.getElementById('create-pays').value;
+  const age = +document.getElementById('create-age').value;
+  const niveau = document.getElementById('create-niveau').value;
+  const perso = document.getElementById('create-perso').value;
+  const diff = document.getElementById('create-diff').value;
+
+  const skater = createSkater(prenom, nom, pays, age, niveau, perso);
+  G = {
+    skater,
+    season: 2026,
+    week: 1,
+    difficulty: diff,
+    aiSkaters: generateAISkaters(),
+    news: ['Bienvenue dans ICE DREAMS. Ta carrière commence maintenant.'],
+    availableSponsors: generateSponsors(skater.reputation)
+  };
+  updateWorldRank();
+  saveGame();
+  showScreen('game');
+  navTo(document.querySelector('[data-screen="dashboard"]'));
+  renderAll();
+  notify('Carrière créée ! Bonne chance.');
+}
+
+function generateSponsors(rep){
+  const list = [];
+  if(rep >= 20) list.push({ name:'Aurora Sports', salary:12000, seasons:2, bonus:8000, req:30 });
+  if(rep >= 40) list.push({ name:'Glide Pro', salary:28000, seasons:2, bonus:15000, req:50 });
+  if(rep >= 55) list.push({ name:'IcePeak', salary:45000, seasons:3, bonus:25000, req:65 });
+  if(rep >= 70) list.push({ name:'Olympic Edge', salary:80000, seasons:3, bonus:40000, req:80 });
+  return list;
+}
+
+// ==================== NAVIGATION ====================
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function navTo(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  const screen = el.dataset.screen;
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('view-'+screen).classList.remove('hidden');
+  renderAll();
+}
+
+// ==================== RENDER ====================
+function renderAll(){
+  if(!G) return;
+  const s = G.skater;
+  document.getElementById('header-name').textContent = s.prenom + ' ' + s.nom;
+  document.getElementById('header-meta').textContent = `Saison ${G.season}/${G.season+1} · Semaine ${G.week}`;
+  document.getElementById('header-rank').textContent = '#' + (s.worldRank || '—');
+  document.getElementById('header-rep').textContent = 'Rep ' + s.reputation;
+
+  // Dashboard
+  document.getElementById('dash-forme').textContent = s.form + '%';
+  document.getElementById('bar-forme').style.width = s.form + '%';
+  document.getElementById('dash-fatigue').textContent = s.fatigue + '%';
+  document.getElementById('bar-fatigue').style.width = s.fatigue + '%';
+  document.getElementById('dash-confiance').textContent = s.confidence + '%';
+  document.getElementById('bar-confiance').style.width = s.confidence + '%';
+  document.getElementById('dash-budget').textContent = '$' + s.money.toLocaleString();
+  document.getElementById('dash-rep').textContent = s.reputation;
+
+  const next = COMPETITIONS.find(c => c.week >= G.week) || COMPETITIONS[COMPETITIONS.length-1];
+  document.getElementById('dash-next-comp').textContent = next.name;
+  document.getElementById('dash-next-days').textContent = `Dans ${Math.max(0, next.week - G.week)} semaines`;
+
+  document.getElementById('dash-news').innerHTML = G.news.slice(-5).reverse().map(n=>`<p style="margin:6px 0;color:var(--muted)">• ${n}</p>`).join('');
+
+  // Skater
+  document.getElementById('sk-identity').innerHTML = `${s.prenom} ${s.nom}<br>${s.age} ans · ${s.pays}`;
+  document.getElementById('sk-perso').textContent = 'Personnalité : ' + s.personality;
+  document.getElementById('sk-potentiel').textContent = s.potential;
+
+  const techKeys = ['axel','lutz','flip','loop','salchow','toe','rotations','precision','edge','spins','steps'];
+  document.getElementById('sk-tech').innerHTML = techKeys.map(k=>attrCard(k, s.attributes[k])).join('');
+  const artKeys = ['interpretation','musicality','performance','presence','composition','transitions','skatingSkills'];
+  document.getElementById('sk-art').innerHTML = artKeys.map(k=>attrCard(k, s.attributes[k])).join('');
+  const mentKeys = ['concentration','pressure','consistency','motivation','discipline','endurance','explosiveness','flexibility','recovery','injuryResist'];
+  document.getElementById('sk-ment').innerHTML = mentKeys.map(k=>attrCard(k, s.attributes[k])).join('');
+
+  // Staff
+  document.getElementById('staff-list').innerHTML = s.staff.length === 0
+    ? '<p style="color:var(--muted)">Aucun membre d\'équipe. Recrutez pour progresser plus vite.</p>'
+    : s.staff.map((st,i)=>`
+      <div class="card" style="margin-bottom:12px;">
+        <strong>${st.role}</strong> — ${st.name}<br>
+        <span style="color:var(--muted)">Niveau ${st.level} · $${st.salary.toLocaleString()}/saison · ${st.bonus}</span>
+        <button class="btn btn-sm btn-danger" style="float:right" onclick="fireStaff(${i})">Licencier</button>
+      </div>`).join('');
+
+  // Calendar
+  document.getElementById('cal-list').innerHTML = COMPETITIONS.map(c=>{
+    const entered = s.calendar.includes(c.id);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><strong>${c.name}</strong><br><span style="color:var(--muted)">Semaine ${c.week} · Prestige ${c.prestige}</span></div>
+      <button class="btn btn-sm ${entered?'btn-outline':''}" onclick="toggleComp('${c.id}')">${entered?'Annuler':'Inscrire'}</button>
+    </div>`;
+  }).join('');
+
+  // Competitions (same as calendar for now)
+  document.getElementById('comp-list').innerHTML = COMPETITIONS.map(c=>{
+    const entered = s.calendar.includes(c.id);
+    const canRun = G.week >= c.week && entered;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div><strong>${c.name}</strong><br><span style="color:var(--muted)">Semaine ${c.week}</span></div>
+      ${canRun ? `<button class="btn btn-sm" onclick="runCompetition('${c.id}')">Simuler</button>` : 
+        entered ? `<span class="badge badge-blue">Inscrite</span>` : `<span style="color:var(--muted)">Non inscrite</span>`}
+    </div>`;
+  }).join('');
+
+  // Scouting
+  document.getElementById('scout-list').innerHTML = G.aiSkaters.slice(0,12).map(ai=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <strong>${ai.name}</strong> (${ai.country}) — ${ai.age} ans<br>
+      <span style="color:var(--muted)">Tech ~${ai.tech} · Art ~${ai.art} · Potentiel estimé ${ai.potential-4}–${ai.potential+3}</span>
+    </div>`).join('');
+
+  // Sponsors
+  document.getElementById('sponsor-list').innerHTML = G.availableSponsors.map((sp,i)=>`
+    <div class="card" style="margin-bottom:12px;">
+      <strong>${sp.name}</strong><br>
+      $${sp.salary.toLocaleString()}/saison · ${sp.seasons} saisons · Bonus podium $${sp.bonus.toLocaleString()}<br>
+      <span style="color:var(--muted)">Exigence : Réputation ≥ ${sp.req}</span>
+      <div class="flex" style="margin-top:10px;">
+        <button class="btn btn-sm" onclick="acceptSponsor(${i})">Accepter</button>
+        <button class="btn btn-sm btn-outline" onclick="G.availableSponsors.splice(${i},1);renderAll()">Refuser</button>
+      </div>
+    </div>`).join('') || '<p style="color:var(--muted)">Aucune offre pour le moment.</p>';
+
+  // Finances
+  document.getElementById('fin-solde').textContent = '$' + s.money.toLocaleString();
+  document.getElementById('fin-rev').textContent = '$' + s.seasonIncome.toLocaleString();
+  document.getElementById('fin-dep').textContent = '$' + s.seasonExpense.toLocaleString();
+
+  // Rankings
+  const ranking = [...G.aiSkaters];
+  ranking.push({ name: s.prenom+' '+s.nom, country: s.pays, points: s.worldPoints, isPlayer:true });
+  ranking.sort((a,b)=>b.points-a.points);
+  document.getElementById('rank-body').innerHTML = ranking.slice(0,20).map((r,i)=>`
+    <tr style="${r.isPlayer?'background:#1e3a5f':''}">
+      <td>${i+1}</td><td>${r.name}</td><td>${r.country}</td><td>${r.points}</td>
+    </tr>`).join('');
+
+  // Messages
+  document.getElementById('msg-list').innerHTML = s.messages.length === 0
+    ? '<p style="color:var(--muted)">Aucun message.</p>'
+    : s.messages.slice().reverse().map(m=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${m.from}</strong><br>${m.text}</div>`).join('');
+
+  // Programs
+  document.getElementById('sp-strategy').value = s.programs.short.strategy;
+  document.getElementById('sp-music').value = s.programs.short.music;
+  document.getElementById('fs-strategy').value = s.programs.free.strategy;
+  document.getElementById('fs-music').value = s.programs.free.music;
+}
+
+function attrCard(key, val){
+  const labels = {axel:'Axel',lutz:'Lutz',flip:'Flip',loop:'Loop',salchow:'Salchow',toe:'Toe Loop',
+    rotations:'Rotations',precision:'Précision',edge:'Edge quality',spins:'Spins',steps:'Steps',
+    interpretation:'Interprétation',musicality:'Musicalité',performance:'Performance',presence:'Présence',
+    composition:'Composition',transitions:'Transitions',skatingSkills:'Skating skills',
+    concentration:'Concentration',pressure:'Gestion pression',consistency:'Régularité',
+    motivation:'Motivation',discipline:'Discipline',endurance:'Endurance',explosiveness:'Explosivité',
+    flexibility:'Flexibilité',recovery:'Récupération',injuryResist:'Résistance blessures'};
+  return `<div style="background:var(--panel2);padding:10px;border-radius:8px;">
+    <div style="font-size:.8rem;color:var(--muted)">${labels[key]||key}</div>
+    <div style="font-size:1.3rem;font-weight:600">${val}</div>
+  </div>`;
+}
+
+// ==================== ACTIONS ====================
+function train(type){
+  const s = G.skater;
+  if(s.fatigue > 88){ notify('Trop fatiguée pour s\'entraîner'); return; }
+  let msg = '';
+  const gain = rnd(1,3);
+  if(type === 'repos'){
+    s.fatigue = Math.max(0, s.fatigue - rnd(18,28));
+    s.form = Math.min(100, s.form + rnd(3,7));
+    s.confidence = Math.min(100, s.confidence + rnd(1,4));
+    msg = 'Repos complet effectué. Fatigue diminuée.';
+  } else {
+    s.fatigue = Math.min(100, s.fatigue + rnd(8,14));
+    s.form = Math.min(100, s.form + rnd(1,3));
+    if(type==='technique'){ ['axel','lutz','flip','loop','salchow','toe','precision'].forEach(k=>s.attributes[k]=Math.min(99,s.attributes[k]+gain)); }
+    if(type==='artistique'){ ['interpretation','musicality','performance','presence','composition','transitions'].forEach(k=>s.attributes[k]=Math.min(99,s.attributes[k]+gain)); }
+    if(type==='sauts'){ ['axel','lutz','flip','rotations','explosiveness'].forEach(k=>s.attributes[k]=Math.min(99,s.attributes[k]+gain+1)); }
+    if(type==='physique'){ s.attributes.endurance=Math.min(99,s.attributes.endurance+gain); s.attributes.recovery=Math.min(99,s.attributes.recovery+gain); }
+    if(type==='mental'){ s.attributes.concentration=Math.min(99,s.attributes.concentration+gain); s.confidence=Math.min(100,s.confidence+rnd(2,5)); }
+    msg = `Entraînement ${type} terminé (+${gain} environ)`;
+    if(Math.random() < 0.07 + s.fatigue/400){
+      s.injuries.push({ type:'légère', days: rnd(3,8) });
+      msg += ' — ⚠ Petite blessure !';
+    }
+  }
+  document.getElementById('train-result').innerHTML = `<p style="color:var(--success)">${msg}</p>`;
+  G.news.push(msg);
+  renderAll();
+  saveGame();
+}
+
+function toggleComp(id){
+  const s = G.skater;
+  const idx = s.calendar.indexOf(id);
+  if(idx >= 0) s.calendar.splice(idx,1);
+  else s.calendar.push(id);
+  renderAll();
+  saveGame();
+}
+
+function saveProgram(type){
+  const s = G.skater;
+  if(type==='short'){
+    s.programs.short.strategy = document.getElementById('sp-strategy').value;
+    s.programs.short.music = document.getElementById('sp-music').value;
+  } else {
+    s.programs.free.strategy = document.getElementById('fs-strategy').value;
+    s.programs.free.music = document.getElementById('fs-music').value;
+  }
+  notify('Programme enregistré');
+  saveGame();
+}
+
+function openRecruit(){
+  const available = STAFF_POOL.filter(st => !G.skater.staff.find(x=>x.role===st.role));
+  if(available.length===0){ notify('Tous les postes sont pourvus'); return; }
+  const st = available[rnd(0,available.length-1)];
+  if(confirm(`Recruter ${st.name} (${st.role}) pour $${st.salary.toLocaleString()}/saison ?\nBonus : ${st.bonus}`)){
+    G.skater.staff.push({...st});
+    G.skater.money -= Math.floor(st.salary/4);
+    G.skater.seasonExpense += Math.floor(st.salary/4);
+    notify(`${st.name} a rejoint l'équipe`);
+    renderAll();
+    saveGame();
+  }
+}
+
+function fireStaff(i){
+  if(confirm('Licencier ce membre ?')){
+    G.skater.staff.splice(i,1);
+    renderAll();
+    saveGame();
+  }
+}
+
+function acceptSponsor(i){
+  const sp = G.availableSponsors[i];
+  if(G.skater.reputation < sp.req){ notify('Réputation insuffisante'); return; }
+  G.skater.sponsors.push(sp);
+  G.skater.money += sp.salary;
+  G.skater.seasonIncome += sp.salary;
+  G.availableSponsors.splice(i,1);
+  notify(`Contrat signé avec ${sp.name}`);
+  renderAll();
+  saveGame();
+}
+
+function runCompetition(id){
+  const comp = COMPETITIONS.find(c=>c.id===id);
+  const s = G.skater;
+  if(s.fatigue > 90){ notify('Trop fatiguée pour concourir'); return; }
+
+  // Simulation
+  const strat = s.programs.free.strategy;
+  let risk = strat==='secure' ? 0.12 : strat==='balanced' ? 0.22 : 0.38;
+  risk += s.fatigue/300 - s.form/400 - s.confidence/500;
+
+  const techBase = (s.attributes.lutz + s.attributes.flip + s.attributes.axel + s.attributes.rotations + s.attributes.precision)/5;
+  const artBase = (s.attributes.interpretation + s.attributes.performance + s.attributes.skatingSkills + s.attributes.musicality)/4;
+  const mental = (s.attributes.concentration + s.attributes.pressure + s.attributes.consistency)/3;
+
+  let techScore = techBase * 0.55 + rnd(-6,8);
+  let pcs = artBase * 0.48 + rnd(-4,6);
+  let falls = 0;
+
+  // Éléments
+  const elements = [
+    {name:'Triple Lutz + Triple Toe', base:11.2},
+    {name:'Triple Flip', base:5.3},
+    {name:'Triple Loop', base:5.1},
+    {name:'Double Axel', base:3.3},
+    {name:'Spin combinaison', base:3.2},
+    {name:'Step Sequence', base:3.5}
+  ];
+
+  let report = `<h3>${comp.name} — Résultat</h3><div style="margin:16px 0;">`;
+  elements.forEach(el=>{
+    const success = Math.random() > risk;
+    if(success){
+      report += `<div>✓ ${el.name} <span style="color:var(--success)">Réussi</span></div>`;
+      techScore += el.base * (0.9 + Math.random()*0.2);
+    } else {
+      falls++;
+      report += `<div>✗ ${el.name} <span style="color:var(--danger)">Chute / erreur</span></div>`;
+      techScore += el.base * 0.3;
+    }
+  });
+  report += `</div>`;
+
+  techScore = Math.max(20, Math.min(95, techScore));
+  pcs = Math.max(18, Math.min(50, pcs));
+  const deductions = falls * 1.0;
+  const total = +(techScore + pcs - deductions).toFixed(2);
+
+  // Classement simplifié
+  let place = 1;
+  if(total < 55) place = rnd(8,15);
+  else if(total < 70) place = rnd(4,9);
+  else if(total < 82) place = rnd(2,5);
+  else if(total < 90) place = rnd(1,3);
+  else place = 1;
+
+  const prize = place===1 ? comp.prize : place<=3 ? Math.floor(comp.prize*0.4) : Math.floor(comp.prize*0.1);
+  const points = place===1 ? 400 : place===2 ? 280 : place===3 ? 200 : Math.max(20, 120-place*8);
+  const prestigeGain = place===1 ? comp.prestige : place<=3 ? Math.floor(comp.prestige*0.5) : Math.floor(comp.prestige*0.15);
+
+  s.money += prize;
+  s.seasonIncome += prize;
+  s.worldPoints += points;
+  s.reputation = Math.min(99, s.reputation + Math.floor(prestigeGain/8));
+  s.fatigue = Math.min(100, s.fatigue + comp.fatigue);
+  s.form = Math.max(30, s.form - rnd(3,8) + (place<=3?5:0));
+  s.confidence = Math.max(20, Math.min(100, s.confidence + (place<=3?8:-4)));
+
+  updateWorldRank();
+
+  report += `
+    <p><strong>Technical Score</strong> ${techScore.toFixed(2)}</p>
+    <p><strong>PCS</strong> ${pcs.toFixed(2)}</p>
+    <p><strong>Déductions</strong> -${deductions.toFixed(2)}</p>
+    <p style="font-size:1.4rem;margin:12px 0;"><strong>TOTAL ${total}</strong></p>
+    <p>Classement : <strong>${place}e</strong></p>
+    <p>+$${prize.toLocaleString()} · +${points} pts · Réputation +${Math.floor(prestigeGain/8)}</p>
+  `;
+
+  G.news.push(`${s.prenom} termine ${place}e au ${comp.name} (${total} pts)`);
+  s.results.push({ comp: comp.name, place, score: total, season: G.season });
+
+  // Modal résultat
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `<div class="modal-content">${report}<br><button class="btn" onclick="this.closest('.modal').remove()">Fermer</button></div>`;
+  document.body.appendChild(modal);
+
+  renderAll();
+  saveGame();
+}
+
+function updateWorldRank(){
+  const ranking = [...G.aiSkaters];
+  ranking.push({ name: G.skater.prenom+' '+G.skater.nom, points: G.skater.worldPoints, isPlayer:true });
+  ranking.sort((a,b)=>b.points-a.points);
+  const idx = ranking.findIndex(r=>r.isPlayer);
+  G.skater.worldRank = idx + 1;
+}
+
+function advanceWeek(){
+  G.week++;
+  const s = G.skater;
+  // Récupération naturelle
+  s.fatigue = Math.max(0, s.fatigue - rnd(4,9));
+  if(s.injuries.length) s.injuries = s.injuries.filter(inj=>{ inj.days--; return inj.days > 0; });
+
+  // Salaires staff
+  s.staff.forEach(st=>{
+    const cost = Math.floor(st.salary / 40);
+    s.money -= cost;
+    s.seasonExpense += cost;
+  });
+
+  // Événements aléatoires
+  if(Math.random() < 0.18){
+    const events = [
+      'Excellente séance d\'entraînement cette semaine.',
+      'Un journaliste demande une interview.',
+      'Petite baisse de motivation.',
+      'Le coach est très satisfait des progrès.',
+      'Offre d\'exhibition reçue.'
+    ];
+    const ev = events[rnd(0,events.length-1)];
+    G.news.push(ev);
+    if(ev.includes('interview')) s.messages.push({from:'Journaliste', text:'Souhaitez-vous répondre à quelques questions avant la prochaine compétition ?'});
+  }
+
+  if(G.week > 52){
+    endSeason();
+  } else {
+    notify(`Semaine ${G.week}`);
+    renderAll();
+    saveGame();
+  }
+}
+
+function endSeason(){
+  G.season++;
+  G.week = 1;
+  G.skater.age++;
+  G.skater.seasonIncome = 0;
+  G.skater.seasonExpense = 0;
+  G.skater.calendar = [];
+  G.availableSponsors = generateSponsors(G.skater.reputation);
+  // Léger vieillissement
+  if(G.skater.age > 26){
+    ['axel','lutz','flip','explosiveness'].forEach(k=>G.skater.attributes[k] = Math.max(30, G.skater.attributes[k]-rnd(1,2)));
+  }
+  G.news.push(`Nouvelle saison ${G.season}/${G.season+1} !`);
+  notify('Nouvelle saison commencée');
+  renderAll();
+  saveGame();
+}
+
+// ==================== SAUVEGARDE ====================
+function saveGame(){
+  localStorage.setItem('iceDreamsSave', JSON.stringify(G));
+}
+
+function loadGame(){
+  const data = localStorage.getItem('iceDreamsSave');
+  if(!data){ notify('Aucune sauvegarde trouvée'); return; }
+  G = JSON.parse(data);
+  showScreen('game');
+  navTo(document.querySelector('[data-screen="dashboard"]'));
+  renderAll();
+  notify('Carrière chargée');
+}
+
+function notify(msg){
+  const n = document.createElement('div');
+  n.className = 'notif';
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(), 3200);
+}
+
+// Démarrage
+if(localStorage.getItem('iceDreamsSave')){
+  // optionnel : auto-load
+}
+</script>
+</body>
+</html>
